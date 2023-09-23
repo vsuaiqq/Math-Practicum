@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <limits.h>
 
 enum factorial_status_code 
 {
@@ -24,7 +25,7 @@ enum range_sum_status_code
     rssc_invalid_parametr
 };
 
-enum factorial_status_code factorial(int x, int *result)
+enum factorial_status_code factorial(int x, long *result)
 {
     if (x < 0)
     {
@@ -36,7 +37,7 @@ enum factorial_status_code factorial(int x, int *result)
         return fsc_ok;
     }
     *result = 1;
-    int prev = 1;
+    long prev = 1;
     for (int num = 2; num <= x; ++num) 
     {
         *result *= num;
@@ -89,17 +90,19 @@ void split_num(const char *num_str)
     printf("\n");
 }
 
-enum range_sum_status_code range_sum(int x, int* result)
+enum range_sum_status_code range_sum(int x, long* result)
 {
     if (x <= 0) 
     {
         return rssc_invalid_parametr;
     }
-    if (x > 1148282) 
+    double a = x * 0.5 + 0.5;
+    long b = x;
+    if (a > LONG_MAX / b) 
     {
         return rssc_overflow;
     }
-    *result = ((1 + x) / 2) * x;
+    *result = a * b;
     return rssc_ok;
 }
 
@@ -128,8 +131,8 @@ void degree_table(int x)
 
 bool is_string_int(char *num_str) 
 {
-    char INT_MAX[] = "2147483647";
-    char INT_MIN[] = "-2147483648";
+    char INT_MAX_STR[] = "2147483647";
+    char INT_MIN_STR[] = "-2147483648";
     if (strlen(num_str) < 10) 
     {
         return true;
@@ -142,11 +145,11 @@ bool is_string_int(char *num_str)
     {
         for (int i = 1; i < 11; ++i) 
         {
-            if ((num_str[i] - '0') > (INT_MIN[i] - '0')) 
+            if ((num_str[i] - '0') > (INT_MIN_STR[i] - '0')) 
             {
                 return false;
             }
-            else if ((num_str[i] - '0') < (INT_MIN[i] - '0'))
+            else if ((num_str[i] - '0') < (INT_MIN_STR[i] - '0'))
             {
                 return true;
             }
@@ -157,11 +160,11 @@ bool is_string_int(char *num_str)
     {
         for (int i = 0; i < 10; ++i) 
         {
-            if ((num_str[i] - '0') > (INT_MAX[i] - '0')) 
+            if ((num_str[i] - '0') > (INT_MAX_STR[i] - '0')) 
             {
                 return false;
             }
-            else if ((num_str[i] - '0') < (INT_MAX[i] - '0'))
+            else if ((num_str[i] - '0') < (INT_MAX_STR[i] - '0'))
             {
                 return true;
             }
@@ -205,7 +208,7 @@ int main(int argc, char *argv[])
 
     int input_num = atoi(argv[1]);
     
-    int result;
+    long result;
 
     switch (argv[2][1])
     {
@@ -229,7 +232,7 @@ int main(int argc, char *argv[])
             switch (range_sum(input_num, &result))
             {
                 case rssc_ok:
-                    printf("%d", result);
+                    printf("%ld\n", result);
                     break;
                 case rssc_overflow:
                     printf("overflow detected!\n");
@@ -261,7 +264,7 @@ int main(int argc, char *argv[])
             switch (factorial(input_num, &result))
             {
                 case fsc_ok:
-                    printf("%d! = %d", input_num, result);
+                    printf("%d! = %ld\n", input_num, result);
                     break;
                 case fsc_overflow:
                     printf("overflow detected!\n");
