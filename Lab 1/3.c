@@ -151,6 +151,12 @@ int main(int argc, char* argv[])
             coef_snd = atof(argv[4]);
             coef_trd = atof(argv[5]);
 
+            if (eps <= 0) 
+            {
+                printf("accuracy must be positive\n");
+                return 1;
+            }
+
             solve_handler(coef_fst, coef_snd, coef_trd, &root_one, &root_two);
             
             if (fabs(coef_fst - coef_snd) > eps && fabs(coef_fst - coef_trd) > eps
@@ -205,9 +211,9 @@ int main(int argc, char* argv[])
             num_one = atoi(argv[2]);
             num_two = atoi(argv[3]);
 
-            if (num_one == 0 || num_two == 0) 
+            if (num_one < 1 || num_two < 1) 
             {
-                printf("arguments must be non-zero!\n");
+                printf("arguments must be non-negative!\n");
                 return 1;
             }
 
@@ -232,6 +238,11 @@ int main(int argc, char* argv[])
             coef_snd = atof(argv[4]);
             coef_trd = atof(argv[5]);
             
+            if (eps <= 0) 
+            {
+                printf("accuracy must be positive\n");
+                return 1;
+            }
             if (coef_fst <= 0 || coef_snd <= 0 || coef_trd <= 0) 
             {
                 printf("sides of triangle must be positive\n");
