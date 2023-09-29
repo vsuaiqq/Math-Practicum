@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     FILE* input_file = NULL;
     FILE* output_file = NULL;
     char* output_file_name = NULL;
-    char* output_file_prefix = "output_";
+    char* output_file_prefix = "out_";
     char flag;
     
     if (argc < 3 || argc > 4) 
@@ -166,7 +166,12 @@ int main(int argc, char* argv[])
         }
         ++i;
 
-        output_file_name = (char*)malloc(sizeof(char*) * (strlen(argv[2]) + strlen(output_file_prefix) + 1));
+        output_file_name = (char*)malloc(sizeof(char*) * (strlen(argv[2]) - i + strlen(output_file_prefix) + 1));
+        if (output_file_name == NULL) 
+        {
+            printf("allocate error\n");
+            return 1;
+        }
         
         for (int j = 0; j < strlen(output_file_prefix); ++j) 
         {
