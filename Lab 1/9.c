@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     int min_el, max_el;
     find_swap_min_max(fixed_arr, FIXED_SIZE, &min_el, &max_el);
 
-    int dynamic_size = get_rand(10, 10);
+    int dynamic_size = get_rand(10, 10000);
 
     int* dynamic_arr_a = (int*)malloc(sizeof(int*) * dynamic_size);
     if (dynamic_arr_a == NULL) 
@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    random_fill(dynamic_arr_a, dynamic_size, -100, 100);
-    random_fill(dynamic_arr_b, dynamic_size, -100, 100);
+    random_fill(dynamic_arr_a, dynamic_size, -1000, 1000);
+    random_fill(dynamic_arr_b, dynamic_size, -1000, 1000);
 
     int* dynamic_arr_c = (int*)malloc(sizeof(int*) * dynamic_size);
     if (dynamic_arr_c == NULL) 
