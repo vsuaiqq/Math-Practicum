@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <limits.h>
 
 enum factorial_status_code 
@@ -129,50 +128,6 @@ void degree_table(int x)
     }
 }
 
-bool is_string_int(char *num_str) 
-{
-    char INT_MAX_STR[] = "2147483647";
-    char INT_MIN_STR[] = "-2147483648";
-    if (strlen(num_str) < 10) 
-    {
-        return true;
-    }
-    if (strlen(num_str) > 11 || (strlen(num_str) == 11 && num_str[0] != '-')) 
-    {
-        return false;
-    }
-    if (num_str[0] == '-') 
-    {
-        for (int i = 1; i < 11; ++i) 
-        {
-            if ((num_str[i] - '0') > (INT_MIN_STR[i] - '0')) 
-            {
-                return false;
-            }
-            else if ((num_str[i] - '0') < (INT_MIN_STR[i] - '0'))
-            {
-                return true;
-            }
-        }
-        return true;
-    }
-    else
-    {
-        for (int i = 0; i < 10; ++i) 
-        {
-            if ((num_str[i] - '0') > (INT_MAX_STR[i] - '0')) 
-            {
-                return false;
-            }
-            else if ((num_str[i] - '0') < (INT_MAX_STR[i] - '0'))
-            {
-                return true;
-            }
-        }
-        return true;
-    }
-}
-
 int main(int argc, char *argv[])
 {
     if (argc > 3) 
@@ -181,36 +136,30 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    for (int i = 0; i < strlen(argv[1]); ++i) 
+    for (int i = 0; i < strlen(argv[2]); ++i) 
     {
-        if (i == 0 && argv[1][0] == '-') 
+        if (i == 0 && argv[2][0] == '-') 
         {
             continue;
         }
-        if ((int)argv[1][i] < 48 || (int)argv[1][i] > 57) 
+        if ((int)argv[2][i] < 48 || (int)argv[2][i] > 57) 
         {
             printf("argument must have int type!\n");
             return 1;
         }
     }
     
-    if ((argv[2][0] != '/' && argv[2][0] != '-') || strlen(argv[2]) != 2)
+    if ((argv[1][0] != '/' && argv[1][0] != '-') || strlen(argv[1]) != 2)
     {
         printf("invalid flag detected!\n");
         return 1;
     }
 
-    if (!is_string_int(argv[1])) 
-    {
-        printf("argument must have int type!\n");
-        return 1;
-    }
-
-    int input_num = atoi(argv[1]);
+    int input_num = atoi(argv[2]);
     
     long result;
 
-    switch (argv[2][1])
+    switch (argv[1][1])
     {
         case 'e':
             if (input_num > 10 || input_num < 1) 
@@ -244,7 +193,7 @@ int main(int argc, char *argv[])
             break;
 
         case 's':
-            split_num(argv[1]);
+            split_num(argv[2]);
             break;
         case 'p':
             switch (is_simple(input_num))

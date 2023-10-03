@@ -34,61 +34,6 @@ enum solve_equation_status_code solve_equation(double a, double b, double c, dou
     }
 }
 
-bool is_string_int(char *num_str) 
-{
-    char INT_MAX_STR[] = "2147483647";
-    char INT_MIN_STR[] = "-2147483648";
-    for (int i = 0; i < strlen(num_str); ++i) 
-    {
-        if (i == 0 && num_str[0] == '-') 
-        {
-            continue;
-        }
-        if ((int)num_str[i] < 48 || (int)num_str[i] > 57) 
-        {
-            return false;
-        }
-    }
-    if (strlen(num_str) < 10) 
-    {
-        return true;
-    }
-    if (strlen(num_str) > 11 || (strlen(num_str) == 11 && num_str[0] != '-')) 
-    {
-        return false;
-    }
-    if (num_str[0] == '-') 
-    {
-        for (int i = 1; i < 11; ++i) 
-        {
-            if ((num_str[i] - '0') > (INT_MIN_STR[i] - '0')) 
-            {
-                return false;
-            }
-            else if ((num_str[i] - '0') < (INT_MIN_STR[i] - '0'))
-            {
-                return true;
-            }
-        }
-        return true;
-    }
-    else
-    {
-        for (int i = 0; i < 10; ++i) 
-        {
-            if ((num_str[i] - '0') > (INT_MAX_STR[i] - '0')) 
-            {
-                return false;
-            }
-            else if ((num_str[i] - '0') < (INT_MAX_STR[i] - '0'))
-            {
-                return true;
-            }
-        }
-        return true;
-    }
-}
-
 bool triangle_check(double side_fst, double side_snd, double side_trd, double eps) 
 {
     double hypo, cath_fst, cath_snd;
@@ -200,11 +145,6 @@ int main(int argc, char* argv[])
             if (argc != 4) 
             {
                 printf("invalid number of arguments\n");
-                return 1;
-            }
-            if (!is_string_int(argv[2]) || !is_string_int(argv[3])) 
-            {
-                printf("arguments must have int type!\n");
                 return 1;
             }
 
