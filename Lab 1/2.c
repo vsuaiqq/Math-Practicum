@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 
     if (eps <= 0) 
     {
-        printf("accuracy must be non-negative!\n");
+        printf("accuracy must be positive!\n");
         return 1;
     }
 
