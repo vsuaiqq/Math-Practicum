@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
             printf("result : %f\n", geom_mean_res);
             break;
         case gm_nan_error:
-            printf("even degree root of a negative number or!\n");
+            printf("even degree root of a negative number!\n");
             break;
         case gm_overflow:
             printf("overflow detected!\n");
