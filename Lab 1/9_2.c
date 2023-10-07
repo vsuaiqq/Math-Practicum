@@ -52,6 +52,9 @@ int main(int argc, char* argv[])
     if (dynamic_arr_a == NULL || dynamic_arr_b == NULL || dynamic_arr_c == NULL) 
     {
         printf("allocate error\n");
+        free(dynamic_arr_a);
+        free(dynamic_arr_b);
+        free(dynamic_arr_c);
         return 1;
     }
  

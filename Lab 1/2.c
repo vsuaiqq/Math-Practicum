@@ -3,15 +3,28 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-bool is_prime(int a) 
+enum status_code 
 {
-    if (a == 2) return true;
-    if (a == 1 || a % 2 == 0) return false;
-    for (int i = 3; i * i <= a; i += 2) 
+    ok,
+    alloc_error,
+};
+
+enum status_code sieve(int t, int** prime_nums) 
+{
+    *prime_nums = (int*)calloc(t + 1, sizeof(int));
+    if (*prime_nums == NULL) return alloc_error;
+    (*prime_nums)[0] = 1, (*prime_nums)[1] = 1; 
+    for (int i = 2; i < t + 1; ++i) 
     {
-        if (a % i == 0) return false; 
+        if ((*prime_nums)[i] == 0) 
+        {
+            for (int j = 2 * i; j < t + 1; j += i) 
+            {
+                (*prime_nums)[j] = 1;
+            }
+        }
     }
-    return true;
+    return ok;
 }
 
 double exp_by_lim(double eps) 
@@ -232,30 +245,48 @@ double gamma_by_series(double eps)
     int k = 2;
     const double pi = pi_by_equation(eps);
     double cur_value = 0.5, prev_value;
+    int near_int_sqrt = 1, cnt = 2, prev_cnt = 1;
     do
     {
-        ++k;
+        ++k, ++cnt;
+        if (cnt - prev_cnt == 3) 
+        {
+            ++near_int_sqrt;
+            prev_cnt = cnt - 1;
+            cnt = 1;
+        }
         prev_value = cur_value;
-        cur_value += (1.0 / pow((int)sqrt(k), 2)) - (1.0 / k);
+        cur_value += (1.0 / (near_int_sqrt * near_int_sqrt) - (1.0 / k));
     } while (fabs(prev_value - cur_value) > eps || fabs(prev_value - cur_value) == 0);
     return cur_value - pi * pi / 6.0;
 }
 
-double gamma_by_equation(double eps) 
+enum status_code gamma_by_equation(double eps, double* res) 
 {
     int t = 2;
     double cur_root = -log(0.5 * log(2)), prev_root;
     double product_of_prime_nums = 0.5;
+    int* prime_nums;
     do {
         ++t;
         prev_root = cur_root;
-        if (is_prime(t)) 
-        {
-            product_of_prime_nums *= (t - 1.0) / t;
-        }
-        cur_root = -log(log(t) * product_of_prime_nums);
+        cur_root = -log(log(t));
     } while(fabs(prev_root - cur_root) > eps);
-    return cur_root;
+    switch (sieve(t, &prime_nums))
+    {
+        case ok:
+            break;
+        case alloc_error:
+            return alloc_error;
+    }
+    for (int i = 3; i < t + 1; ++i) 
+    {
+        if(prime_nums[i] == 0) product_of_prime_nums *= (i - 1.0) / i;
+    }
+    cur_root -= log(product_of_prime_nums);
+    *res = cur_root;
+    free(prime_nums);
+    return ok;
 }
 
 int main(int argc, char *argv[]) 
@@ -267,7 +298,7 @@ int main(int argc, char *argv[])
     }
 
     const double eps = atof(argv[1]);
-
+    double gamma_by_eq_res;
     if (eps <= 0) 
     {
         printf("accuracy must be positive!\n");
@@ -292,9 +323,17 @@ int main(int argc, char *argv[])
     
     printf("gamma limit: %f\n", gamma_by_lim(eps));
     printf("gamma series: %f\n", gamma_by_series(eps));
-    printf("gamma equation: %f\n", gamma_by_equation(eps));
+    switch (gamma_by_equation(eps, &gamma_by_eq_res))
+    {
+        case ok:
+            printf("gamma equation: %f\n", gamma_by_eq_res);
+            break;
+        case alloc_error:
+            printf("memory allocation error\n");
+            return 1;
+    }
+   
     
-
-
+    
     return 0;
 }

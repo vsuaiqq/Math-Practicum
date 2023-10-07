@@ -15,6 +15,7 @@ enum binary_pow_status_code
 {
     bp_overflow,
     bp_ok,
+    bp_undef,
 };
 
 enum geometric_mean_status_code geometric_mean(double* result, int count, ...) 
@@ -42,8 +43,9 @@ enum geometric_mean_status_code geometric_mean(double* result, int count, ...)
     return gm_ok;
 }
 
-enum binary_pow_status_code binary_pow(double* result, double a, int n) 
+enum binary_pow_status_code binary_pow(double* result, double a, int n, double eps) 
 {
+    if (fabsl(a) < eps && fabsl(n) < eps) return bp_undef;
     if (n == 0) 
     {
         *result = 1;
@@ -52,7 +54,7 @@ enum binary_pow_status_code binary_pow(double* result, double a, int n)
     enum binary_pow_status_code recursive_status_code;
     if (n % 2 != 0) 
     {
-        recursive_status_code = binary_pow(result, a, abs(n - 1));
+        recursive_status_code = binary_pow(result, a, abs(n - 1), eps);
         if (isinf(*result)) return bp_overflow;
         switch (recursive_status_code)
         {
@@ -70,7 +72,7 @@ enum binary_pow_status_code binary_pow(double* result, double a, int n)
     }
     else 
     {
-        recursive_status_code = binary_pow(result, a, abs(n / 2));
+        recursive_status_code = binary_pow(result, a, abs(n / 2), eps);
         if (isinf(*result)) return bp_overflow;
         switch (recursive_status_code)
         {
@@ -99,23 +101,26 @@ int main(int argc, char* argv[])
             break;
         case gm_nan_error:
             printf("even degree root of a negative number!\n");
-            break;
+            return 1;
         case gm_overflow:
             printf("overflow detected!\n");
-            break;
+            return 1;
         case gm_invalid_param:
             printf("invalid parameter!\n");
-            break;
+            return 1;
     }
 
-    switch (binary_pow(&bin_pow_res, 2, -3))
+    switch (binary_pow(&bin_pow_res, 1, -10, 1e-5))
     {
         case bp_ok:
             printf("result : %f\n", bin_pow_res);
             break;
         case bp_overflow:
             printf("overflow detected!\n");
-            break;
+            return 1;
+        case bp_undef:
+            printf("uncertainty of the form 0 in degree 0\n");
+            return 1;
     }
 
     return 0;

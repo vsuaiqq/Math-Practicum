@@ -38,7 +38,7 @@ enum status_code double_factorial(int n, long* res)
     }
     *res = 1;
     long prev = 1;
-    for (int i = (2 - n % 2); i <= n; i += 2) 
+    for (int i = (2 - (n & 1)); i <= n; i += 2) 
     {
         *res *= i;
         if (*res < prev) 
@@ -52,6 +52,7 @@ enum status_code double_factorial(int n, long* res)
 
 enum status_code sum_a(double x, double eps, double* res)
 {
+    if (fabsl(x) < eps) return 0;
     int n = 0;
     double prev = 1;
     *res = 1;
@@ -76,6 +77,7 @@ enum status_code sum_a(double x, double eps, double* res)
 
 enum status_code sum_b(double x, double eps, double* res)
 {
+    if (fabsl(x) < eps) return 0;
     int n = 0;
     double prev = 1;
     *res = 1;
@@ -101,6 +103,7 @@ enum status_code sum_b(double x, double eps, double* res)
 
 enum status_code sum_c(double x, double eps, double* res)
 {
+    if (fabsl(x) < eps) return 0;
     int n = 0;
     double prev = 1;
     *res = 1;
@@ -134,6 +137,7 @@ enum status_code sum_c(double x, double eps, double* res)
 enum status_code sum_d(double x, double eps, double* res)
 {
     int n = 0;
+    if (fabsl(x) < eps) return 0;
     double prev = 1;
     *res = 1;
     do

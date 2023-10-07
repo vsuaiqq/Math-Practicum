@@ -16,22 +16,19 @@ enum solve_equation_status_code solve_equation(double a, double b, double c, dou
 {
     if (a == 0) return invalid_param;
     double discriminant = (b * b) - (4 * a * c);
+    double discriminant_sqrt = sqrt(discriminant);
     if (discriminant > 0) 
     {
-        *x_fst = (-1 * b + sqrt(discriminant)) / (2 * a);
-        *x_snd = (-1 * b - sqrt(discriminant)) / (2 * a);
+        *x_fst = (-1 * b + discriminant_sqrt) / (2 * a);
+        *x_snd = (-b - discriminant_sqrt) / (2 * a);
         return two_rootes;
     }
     else if (discriminant == 0) 
     {
         *x_fst = (-1 * b) / (2 * a);
-        *x_snd = *x_fst; 
         return one_root;
     }
-    else 
-    {
-        return no_rootes;
-    }
+    else return no_rootes;
 }
 
 bool triangle_check(double side_fst, double side_snd, double side_trd, double eps) 
@@ -192,12 +189,11 @@ int main(int argc, char* argv[])
             {
                 printf("yes\n");
             }
-            else 
-            {
-                printf("no\n");
-            }
+            else printf("no\n");
             break;
         }
+        
+        return 0;
     }
     else 
     {

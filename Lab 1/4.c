@@ -4,6 +4,12 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+enum status_code 
+{
+    ok,
+    allocate_error,
+};
+
 bool is_latin(char c) 
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -21,7 +27,7 @@ void remove_digits(FILE* in_file, FILE* out_file)
     }
 }
 
-void count_latin(FILE* in_file, FILE* out_file) 
+enum status_code count_latin(FILE* in_file, FILE* out_file) 
 {
     char cur_symbol, prev_symbol;
     int counter = 0, prev_counter = 1, counter_len = 1;
@@ -40,6 +46,11 @@ void count_latin(FILE* in_file, FILE* out_file)
         if (cur_symbol == '\n') 
         {
             counter_str = (char*)malloc(sizeof(char*) * (counter_len + 1));
+            if (counter_str == NULL) 
+            {
+                free(counter_str);
+                return allocate_error;
+            }
             sprintf(counter_str, "%d\n", counter);
             fputs(counter_str, out_file);
             counter = 0, counter_len = 0;
@@ -49,13 +60,19 @@ void count_latin(FILE* in_file, FILE* out_file)
     if (prev_symbol != '\n') 
     {
         counter_str = (char*)malloc(sizeof(char*) * (counter_len + 1));
+        if (counter_str == NULL) 
+        {
+            free(counter_str);
+            return allocate_error;
+        }
         sprintf(counter_str, "%d\n", counter);
         fputs(counter_str, out_file);
         free(counter_str);
     }
+    return ok;
 }
 
-void s_flag_func(FILE* in_file, FILE* out_file) 
+enum status_code s_flag_func(FILE* in_file, FILE* out_file) 
 {
     char cur_symbol, prev_symbol;
     int counter = 0, prev_counter = 1, counter_len = 1;
@@ -74,6 +91,11 @@ void s_flag_func(FILE* in_file, FILE* out_file)
         if (cur_symbol == '\n') 
         {
             counter_str = (char*)malloc(sizeof(char*) * (counter_len + 1));
+            if (counter_str == NULL) 
+            {
+                free(counter_str);
+                return allocate_error;
+            }
             sprintf(counter_str, "%d\n", counter);
             fputs(counter_str, out_file);
             counter = 0, counter_len = 0;
@@ -83,16 +105,27 @@ void s_flag_func(FILE* in_file, FILE* out_file)
     if (prev_symbol != '\n') 
     {
         counter_str = (char*)malloc(sizeof(char*) * (counter_len + 1));
+        if (counter_str == NULL) 
+        {
+            free(counter_str);
+            return allocate_error;
+        }
         sprintf(counter_str, "%d\n", counter);
         fputs(counter_str, out_file);
         free(counter_str);
     }
+    return ok;
 }
 
-void replace_to_ascii(FILE* in_file, FILE* out_file) 
+enum status_code replace_to_ascii(FILE* in_file, FILE* out_file) 
 {
     char cur_symbol;
-    char* hex_ascii = (char*)malloc(sizeof(char*) * 3);
+    char* hex_ascii = (char*)malloc(sizeof(char) * 3);
+    if (hex_ascii == NULL) 
+    {
+        free(hex_ascii);
+        return allocate_error;
+    }
     while ((cur_symbol = fgetc(in_file)) != EOF)  
     {
         if (!isdigit(cur_symbol)) 
@@ -106,6 +139,7 @@ void replace_to_ascii(FILE* in_file, FILE* out_file)
         }
     }
     free(hex_ascii);
+    return ok;
 }
 
 int main(int argc, char* argv[])
@@ -160,10 +194,7 @@ int main(int argc, char* argv[])
         }
 
         int i = strlen(argv[2]) - 1;
-        while (argv[2][i] != '/' && i >= 0) 
-        {
-            --i;
-        }
+        while (argv[2][i] != '/' && i >= 0) --i;
         ++i;
 
         output_file_name = (char*)malloc(sizeof(char*) * (strlen(argv[2]) - i + strlen(output_file_prefix) + 1));
@@ -187,6 +218,7 @@ int main(int argc, char* argv[])
         output_file = fopen(output_file_name, "w");
         if (!output_file) 
         {
+            free(output_file_name);
             printf("file open error\n");
             return 1;
         }
@@ -200,21 +232,45 @@ int main(int argc, char* argv[])
             remove_digits(input_file, output_file);
             break;
         case 'i':
-            count_latin(input_file, output_file);
+            switch (count_latin(input_file, output_file))
+            {
+                case ok:
+                    break;
+                case allocate_error:
+                    if (output_file_name) free(output_file_name);
+                    printf("allocate error\n");
+                    return 1;
+            }
         case 's':
-            s_flag_func(input_file, output_file);
+            switch (s_flag_func(input_file, output_file))
+            {
+                case ok:
+                    break;
+                case allocate_error:
+                    if (output_file_name) free(output_file_name);
+                    printf("allocate error\n");
+                    return 1;
+            }
         case 'a':
-            replace_to_ascii(input_file, output_file);
+            switch (replace_to_ascii(input_file, output_file))
+            {
+                case ok:
+                    break;
+                case allocate_error:
+                    if (output_file_name) free(output_file_name);
+                    printf("allocate error\n");
+                    return 1;
+            }
         default:
+            if (output_file_name) free(output_file_name);
             printf("invalid flag\n");
             return 1;
     }
 
-    if (output_file_name) 
-    {
-        free(output_file_name);
-    }
+    if (output_file_name) free(output_file_name);
 
     fclose(input_file);
     fclose(output_file);
+
+    return 0;
 }

@@ -58,8 +58,14 @@ int main(int argc, char* argv[])
     }
 
     int fixed_arr[FIXED_SIZE];
-    int min_rand = atoi(argv[1]), max_rand = atoi(argv[2]);
+    int min_rand, max_rand;
     
+    if (sscanf(argv[1], "%d", &min_rand) == 0 || sscanf(argv[2], "%d", &max_rand) == 0) 
+    {
+        printf("arguments must have int type\n");
+        return 1;
+    }
+
     if (min_rand > max_rand) swap(&min_rand, &max_rand);
 
     random_fill(fixed_arr, FIXED_SIZE, min_rand, max_rand);
