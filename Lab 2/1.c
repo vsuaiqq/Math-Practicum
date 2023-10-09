@@ -96,7 +96,6 @@ enum status_code sort_by_group(char* str, char** res_str)
     *res_str = (char*)malloc(sizeof(char) * (str_len + 1));
     if (*res_str == NULL) 
     {
-        free(*res_str);
         return allocate_error;
     }
     int digits_ins = 0, letters_ins = 0, other_ins = 0;
@@ -129,7 +128,6 @@ enum status_code concat_strings(char* strings[], int len_of_strings, char** res_
     *res_str = (char*)malloc(sizeof(char) * (total_len + 1));
     if (*res_str == NULL) 
     {
-        free(*res_str);
         return allocate_error;
     }
     srand(RANDOM_SEED);

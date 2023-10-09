@@ -3,68 +3,71 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <math.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #define MAX_STR_SIZE 32
+#define MIN_SS_BASE 2
+#define MAX_SS_BASE 36
 
-int to_decimal(char* str, int base) 
+
+bool validate_base(int base) 
 {
-    const int len = strlen(str);
-    int res = 0, degree = len - 1;
-    for (int i = 0; i < strlen(str); ++i) 
-    {
-        int digit = isdigit(str[i]) ? (str[i] - '0') : (str[i] - 55);
-        res += digit * pow(base, degree);
-        --degree;
-    }
-    return res;
+    return (base >= MIN_SS_BASE && base <= MAX_SS_BASE);
 }
 
-int from_decimal(int x, int)
 
-bool validate_input(char input_str[], int base) 
+
+
+int main() 
 {
-    for (int i = 0; i < strlen(input_str); ++i) 
-    {
-        char cur_symbol = input_str[i];
-        if (!isalpha(cur_symbol) && !isdigit(cur_symbol)) return false;
-        if (isalpha(cur_symbol)) 
-        {
-            if (cur_symbol < 'A' || cur_symbol > 'Z') return false;
-        }
-        if (isdigit(cur_symbol)) 
-        {
-            
-        }
+    int base, max_input_decimal = INT_MIN;
+    char input_str[MAX_STR_SIZE], max_input_str[MAX_STR_SIZE];
+    bool is_negative, max_input_is_negative;
 
-    }
-    return true;
-}
-
-int main(int argc, char* argv[]) 
-{
-    int base;
-    char input_num[MAX_STR_SIZE];
-    if(!scanf("%d", &base)) 
+    if (!scanf("%d", &base)) 
     {
         printf("base must have int type\n");
         return 1;
     }
-    if (base > 36 || base < 2) 
+
+    if (!validate_base(base)) 
     {
         printf("base must be in range [2, 36]");
+        return 1;
     }
-    scanf("%s", input_num);
-    while (strcmp(input_num, "Stop")) 
+
+    scanf("%s", input_str);
+    while (strcmp(input_str, "Stop")) 
     {
-        scanf("%s", input_num);
-        switch (validate_input(input_num, base))
+        printf("%d\n", strlen(input_str));
+        is_negative = (input_str[0] == '-') ? true : false;
+        
+        if (!validate_input(input_str, base, is_negative)) 
         {
-            case true:
+            printf("invalid value for current base\n");
+            return 1;
+        }
+
+        int input_decimal;
+        switch (to_decimal(input_str, base, is_negative, &input_decimal))
+        {
+            case td_ok:
+                printf("%d\n", input_decimal);
                 break;
-            case false:
-                printf("incorrect value for current base\n");
+            case td_overflow:
+                printf("overflow!\n");
                 return 1;
         }
+       
+        if (iabs(input_decimal) > iabs(max_input_decimal))
+        {
+            max_input_decimal = input_decimal;
+            max_input_is_negative = is_negative;
+            strcpy(max_input_str, input_str);
+        }
+
+        scanf("%s", input_str);
     }
 
     return 0;
