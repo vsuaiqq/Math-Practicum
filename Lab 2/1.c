@@ -93,7 +93,7 @@ enum status_code sort_by_group(char* str, char** res_str)
         else if (my_isdigit(str[i])) ++ digits_count;
         else ++other_count;
     }
-    *res_str = (char*)malloc(sizeof(char*) * str_len);
+    *res_str = (char*)malloc(sizeof(char) * (str_len + 1));
     if (*res_str == NULL) 
     {
         free(*res_str);
@@ -118,6 +118,7 @@ enum status_code sort_by_group(char* str, char** res_str)
             ++other_ins;
         }
     }
+    (*res_str)[str_len] = '\0';
     return ok;
 }
 
@@ -125,7 +126,7 @@ enum status_code concat_strings(char* strings[], int len_of_strings, char** res_
 {
     int total_len = my_strlen(strings[2]);
     for (int i = 4; i < len_of_strings; ++i) total_len += my_strlen(strings[i]);
-    *res_str = (char*)malloc(sizeof(char*) * total_len);
+    *res_str = (char*)malloc(sizeof(char) * (total_len + 1));
     if (*res_str == NULL) 
     {
         free(*res_str);
@@ -157,6 +158,7 @@ enum status_code concat_strings(char* strings[], int len_of_strings, char** res_
             ++idx;
         }
     }
+    (*res_str)[total_len] = '\0';
     return ok;
 }
 
@@ -169,7 +171,6 @@ int main(int argc, char* argv[])
     }
 
     const char flag = argv[1][1];
-
     int str_len;
     char* reversed_str = NULL;
     char* odd_pos_upped_str = NULL;
@@ -250,7 +251,6 @@ int main(int argc, char* argv[])
     if (odd_pos_upped_str) free(odd_pos_upped_str);
     if (sorted_by_group_str) free(sorted_by_group_str);
     if (concated_str) free(concated_str);
-
 
     return 0;
 }
