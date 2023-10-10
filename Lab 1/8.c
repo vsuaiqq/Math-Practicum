@@ -24,13 +24,12 @@ bool is_valid_char(char c)
     return ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A') && (c <= 'Z'));
 }
 
-int char_to_num(char c) 
+int valid_char_to_digit(char c) 
 {
-    if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'z') return c - 87;
     if (c >= 'A' && c <= 'Z') return c - 55;
+    else return (c - '0');
 }
-
 
 enum to_decimal_status_code to_decimal(char* str, int base, bool is_negative, int* res) 
 {
@@ -39,7 +38,7 @@ enum to_decimal_status_code to_decimal(char* str, int base, bool is_negative, in
     {
         if (*res > INT_MAX / base) return td_overflow;
         *res = (*res) * base;
-        int digit = char_to_num(str[i]);
+        int digit = valid_char_to_digit(str[i]);
         if (*res > INT_MAX - digit) return td_overflow;
         *res += digit;
     }
@@ -47,7 +46,7 @@ enum to_decimal_status_code to_decimal(char* str, int base, bool is_negative, in
     return td_ok;
 }
 
-enum read_lexeme_status_code read_lexeme (FILE* file, char** res_str, int* min_base) 
+enum read_lexeme_status_code read_lexeme(FILE* file, char** res_str, int* min_base) 
 {
     *res_str = (char*)malloc(sizeof(char) * (MAX_STR_SIZE + 1));
     if (*res_str == NULL) 
@@ -61,10 +60,10 @@ enum read_lexeme_status_code read_lexeme (FILE* file, char** res_str, int* min_b
     {
         if (!is_valid_char(c) && char_cnt != '0' && c != '-') 
         {
-            free(*res_str);
             return rl_invalid;
         }
-        if (char_to_num(c) + 1 > *min_base) *min_base = char_to_num(c) + 1;
+        int cur_min_base = valid_char_to_digit(c) + 1;
+        if (cur_min_base > *min_base) *min_base = cur_min_base;
         ++char_cnt;
         if (char_cnt > MAX_STR_SIZE) 
         {
@@ -140,6 +139,7 @@ int main (int argc, char* argv[])
                 break;
             case rl_invalid:
                 printf("invalid value\n");
+                free(cur_lexem);
                 fclose(input_file);
                 fclose(output_file);
                 return 1;
