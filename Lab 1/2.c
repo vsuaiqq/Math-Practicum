@@ -248,16 +248,15 @@ enum status_code gamma_by_equation(double eps, double* res)
     int t = 2, cur_capacity = 32, cur_size = 0;
     double cur_root = -log(0.5 * log(2)), prev_root;
     double product_of_prime_nums = 0.5;
-    int* prime_nums = (int*)malloc(sizeof(int) * 32);
-    do {
+    int* prime_nums;
+    do 
+    {
         ++t;
         prev_root = cur_root;
         cur_root = -log(log(t));
     } while(fabs(prev_root - cur_root) > eps);
-    if (prime_nums == NULL) 
-    {
-        return alloc_error;
-    }
+    prime_nums = (int*)malloc(sizeof(int) * 32);
+    if (prime_nums == NULL) return alloc_error;
     prime_nums[0] = 2;
     ++cur_size;
     for (int d = 3; d * d <= t; d += 2) 
