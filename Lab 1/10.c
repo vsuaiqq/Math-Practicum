@@ -10,13 +10,6 @@
 #define MIN_SS_BASE 2
 #define MAX_SS_BASE 36
 
-const char ALL_CHARS[] = {
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z',
-};
-
 enum read_string_status_code 
 {
     rs_ok,
@@ -50,11 +43,6 @@ bool validate_input(char* input_str, int base)
         if (input_str[i] >= 'A' && input_str[i] <= 'Z' && (input_str[i] - 55) >= base) return false;
     }
     return true;
-}
-
-char char_of_remainder(int decimal, int base) 
-{
-    return ALL_CHARS[decimal % base];
 }
 
 int valid_char_to_digit(char c) 
@@ -117,8 +105,8 @@ enum from_decimal_status_code from_decimal(int decimal, int new_base, bool is_ne
     int idx = 0;
     while (decimal > 0) 
     {
-        char last_digit = char_of_remainder(decimal, new_base);
-        (*res_str)[idx] = last_digit;
+        int last_digit = decimal % new_base;
+        (*res_str)[idx] = ((last_digit < 10) ? (last_digit + '0') : (last_digit + 55));
         decimal /= new_base;
         ++idx;    
     }

@@ -9,24 +9,6 @@ enum status_code
     alloc_error,
 };
 
-enum status_code sieve(int t, int** prime_nums) 
-{
-    *prime_nums = (int*)calloc(t + 1, sizeof(int));
-    if (*prime_nums == NULL) return alloc_error;
-    (*prime_nums)[0] = 1, (*prime_nums)[1] = 1; 
-    for (int i = 2; i < t + 1; ++i) 
-    {
-        if ((*prime_nums)[i] == 0) 
-        {
-            for (int j = 2 * i; j < t + 1; j += i) 
-            {
-                (*prime_nums)[j] = 1;
-            }
-        }
-    }
-    return ok;
-}
-
 double exp_by_lim(double eps) 
 {
     int n = 1;
@@ -263,25 +245,48 @@ double gamma_by_series(double eps)
 
 enum status_code gamma_by_equation(double eps, double* res) 
 {
-    int t = 2;
+    int t = 2, cur_capacity = 32, cur_size = 0;
     double cur_root = -log(0.5 * log(2)), prev_root;
     double product_of_prime_nums = 0.5;
-    int* prime_nums;
+    int* prime_nums = (int*)malloc(sizeof(int) * 32);
     do {
         ++t;
         prev_root = cur_root;
         cur_root = -log(log(t));
     } while(fabs(prev_root - cur_root) > eps);
-    switch (sieve(t, &prime_nums))
+    if (prime_nums == NULL) 
     {
-        case ok:
-            break;
-        case alloc_error:
-            return alloc_error;
+        return alloc_error;
     }
-    for (int i = 3; i < t + 1; ++i) 
+    prime_nums[0] = 2;
+    ++cur_size;
+    for (int d = 3; d * d <= t; d += 2) 
     {
-        if(prime_nums[i] == 0) product_of_prime_nums *= (i - 1.0) / i;
+        bool is_prime = true;
+        for (int i = 0; i < cur_size; ++i) 
+        {
+            if (d % prime_nums[i] == 0) 
+            {
+                is_prime = false;
+                break;
+            }
+        }
+        if (is_prime) 
+        {
+            prime_nums[cur_size] = d;
+            product_of_prime_nums *= (prime_nums[cur_size - 1] - 1.0) / prime_nums[cur_size - 1];
+            ++cur_size;
+            if (cur_size >= cur_capacity) 
+            {
+                cur_capacity *= 2;
+                prime_nums = realloc(prime_nums, sizeof(int) * cur_capacity);
+                if (prime_nums == NULL) 
+                {
+                    free(prime_nums);
+                    return alloc_error;
+                }
+            }
+        } else continue;
     }
     cur_root -= log(product_of_prime_nums);
     *res = cur_root;
@@ -333,7 +338,5 @@ int main(int argc, char *argv[])
             return 1;
     }
    
-    
-    
     return 0;
 }
