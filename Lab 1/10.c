@@ -51,7 +51,7 @@ int valid_char_to_digit(char c)
     else return (c - '0');
 }
 
-void write_string_skip_trailing_zeros(char* str) 
+void write_string_skip_leading_zeros(char* str) 
 {
     int idx = 0;
     if (str[0] == '-') 
@@ -276,7 +276,7 @@ int main()
         return 1;
     }
 
-    write_string_skip_trailing_zeros(max_input_str);
+    write_string_skip_leading_zeros(max_input_str);
     printf("%s\n", max_input_str_9cc);
     printf("%s\n", max_input_str_18cc);
     printf("%s\n", max_input_str_27cc);

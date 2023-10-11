@@ -82,7 +82,7 @@ enum read_lexeme_status_code read_lexeme(FILE* file, char** res_str, int* min_ba
     return rl_ok;
 }
 
-void write_lexem_skip_trailing_zeros(char* str, FILE* file) 
+void write_lexem_skip_leading_zeros(char* str, FILE* file) 
 {
     int idx = 0;
     if (str[0] == '-') 
@@ -165,7 +165,7 @@ int main (int argc, char* argv[])
                 return 1;
         }
         
-        write_lexem_skip_trailing_zeros(cur_lexem, output_file);
+        write_lexem_skip_leading_zeros(cur_lexem, output_file);
         write_min_base(min_base, output_file);
         write_decimal(lexem_decimal, output_file);
         fputc('\n', output_file);
