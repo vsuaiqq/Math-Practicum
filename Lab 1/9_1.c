@@ -35,10 +35,8 @@ void random_fill(int arr[], int size, int min, int max)
 
 void find_swap_min_max(int arr[], int size, int* min_res, int* max_res) 
 {
-    if (!size) 
-    {
-        return;
-    }
+    if (!size) return;
+
     int min = arr[0], min_idx = 0, max = arr[0], max_idx = 0;
     for (int i = 1; i < size; ++i) 
     {

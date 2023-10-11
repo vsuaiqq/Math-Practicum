@@ -49,11 +49,7 @@ enum to_decimal_status_code to_decimal(char* str, int base, bool is_negative, in
 enum read_lexeme_status_code read_lexeme(FILE* file, char** res_str, int* min_base) 
 {
     *res_str = (char*)malloc(sizeof(char) * (MAX_STR_SIZE + 1));
-    if (*res_str == NULL) 
-    {
-        free(*res_str);
-        return rl_allocate_err;
-    }
+    if (*res_str == NULL) return rl_allocate_err;
     int cur_size = MAX_STR_SIZE, char_cnt = 0;
     char c = fgetc(file);
     while (!isspace(c) && c != EOF) 
@@ -68,12 +64,13 @@ enum read_lexeme_status_code read_lexeme(FILE* file, char** res_str, int* min_ba
         if (char_cnt > MAX_STR_SIZE) 
         {
             cur_size *= 2;
-            *res_str = (char*)realloc(*res_str, cur_size);
-            if (*res_str == NULL) 
+            char* tmp = (char*)realloc(*res_str, cur_size);
+            if (tmp == NULL) 
             {
                 free(*res_str);
                 return rl_allocate_err;
             }
+            *res_str = tmp;
         }
         (*res_str)[char_cnt - 1] = c;
         c = fgetc(file);
@@ -82,8 +79,9 @@ enum read_lexeme_status_code read_lexeme(FILE* file, char** res_str, int* min_ba
     return rl_ok;
 }
 
-void write_lexem_skip_leading_zeros(char* str, FILE* file) 
+void write_lexem_skip_leading_zeros(char const* str, FILE* file) 
 {
+    if (!*str) return;
     int idx = 0;
     if (str[0] == '-') 
     { 
@@ -91,6 +89,7 @@ void write_lexem_skip_leading_zeros(char* str, FILE* file)
         ++idx; 
     }
     while (str[idx] == '0') ++idx;
+    if (str[idx] == '\0') fputc('0', file);
     for (int i = idx; str[i] != '\0'; ++i) 
     {
         fputc(str[i], file); 

@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
 
     const double eps = atof(argv[1]);
     double gamma_by_eq_res;
+    
     if (eps <= 0) 
     {
         printf("accuracy must be positive!\n");

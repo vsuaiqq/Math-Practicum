@@ -268,7 +268,6 @@ int main(int argc, char* argv[])
     }
 
     if (output_file_name) free(output_file_name);
-
     fclose(input_file);
     fclose(output_file);
 

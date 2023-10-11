@@ -59,7 +59,8 @@ enum status_code solve(double* res, enum status_code func(double* res, double x)
                 case ok:
                 case overflow:
                     break;
-                case invalid_parameter: return invalid_parameter;
+                case invalid_parameter: 
+                    return invalid_parameter;
             }
             cur += (func_value * len_of_split);
         }

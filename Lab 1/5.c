@@ -178,8 +178,7 @@ enum status_code sum_d(double x, double eps, double* res)
 
 int main(int argc, char* argv[])
 {
-    double eps, x;
-    double res;
+    double eps, x, res;
 
     if (argc != 3) 
     {

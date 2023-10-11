@@ -89,11 +89,8 @@ enum from_decimal_status_code from_decimal(int decimal, int new_base, bool is_ne
     if (decimal == 0) size = 2;
     else size += log(decimal) / log(new_base) + 1;
 
-    *res_str = (char*)malloc(sizeof(char) * size);
-    if (*res_str == NULL) 
-    {
-        return fd_allocate_err;
-    }
+    *res_str = (char*)malloc(sizeof(char) * (size + 1));
+    if (*res_str == NULL) return fd_allocate_err;
 
     if (decimal == 0) 
     {
@@ -129,10 +126,8 @@ enum from_decimal_status_code from_decimal(int decimal, int new_base, bool is_ne
 enum read_string_status_code read_string(char** res_str) 
 {
     *res_str = (char*)malloc(sizeof(char) * (MAX_STR_SIZE + 1));
-    if (*res_str == NULL) 
-    {
-        return rs_allocate_err;
-    }
+    if (*res_str == NULL) return rs_allocate_err;
+
     int cur_size = MAX_STR_SIZE, char_cnt = 0;
     char c = getchar();
 
@@ -144,12 +139,13 @@ enum read_string_status_code read_string(char** res_str)
         if (char_cnt > MAX_STR_SIZE) 
         {
             cur_size *= 2;
-            *res_str = (char*)realloc(*res_str, cur_size);
-            if (*res_str == NULL) 
+            char* tmp = (char*)realloc(*res_str, cur_size);
+            if (tmp == NULL) 
             {
                 free(*res_str);
                 return rs_allocate_err;
             }
+            *res_str = tmp;
         }
         (*res_str)[char_cnt - 1] = c;
         c = getchar();

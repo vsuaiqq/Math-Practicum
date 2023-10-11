@@ -151,7 +151,6 @@ int main(int argc, char* argv[])
 
             fclose(file_1);
             fclose(file_2);
-
             break;
 
         default:

@@ -33,8 +33,7 @@ void fill_c_arr(int c[], int a[], int b[], int size)
         {
             if (abs(a[i] - b[j]) < diff) 
             {
-                diff = abs(a[i] - b[j]);
-                min_diff_el = b[j];
+                diff = abs(a[i] - b[j]), min_diff_el = b[j];
             }
         }
         c[i] = a[i] + min_diff_el;

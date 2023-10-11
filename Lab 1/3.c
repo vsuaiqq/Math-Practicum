@@ -145,8 +145,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            num_one = atoi(argv[2]);
-            num_two = atoi(argv[3]);
+            num_one = atoi(argv[2]), num_two = atoi(argv[3]);
 
             if (num_one < 1 || num_two < 1) 
             {

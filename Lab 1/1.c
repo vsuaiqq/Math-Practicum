@@ -230,5 +230,6 @@ int main(int argc, char *argv[])
             printf("unknown flag detected!\n");
             break;
     }
+    
     return 0;
 }
