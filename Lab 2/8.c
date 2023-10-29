@@ -13,21 +13,6 @@ typedef enum status_code
     allocate_error,
 } status_code;
 
-void multi_free(const int ptrs_num, ...) 
-{
-    va_list ptr;
-    va_start(ptr, ptrs_num);
-    for (int i = 0; i < ptrs_num; ++i) 
-    {
-        void* ptr_to_free = va_arg(ptr, void*);
-        if (ptr_to_free != NULL) 
-        {
-            free(ptr_to_free);
-        }
-    }
-    va_end(ptr);
-}
-
 bool validate_base(const int base) 
 {
     return base >= 2 && base <= 36;
@@ -104,8 +89,14 @@ status_code sum_of_two(const char* str_1, const char* str_2, const int base, cha
     }
     (*res)[0] = (carry == 1) ? '1': '0';
 
+    bool is_all_zero = false;
     int i = 0;
-    while ((*res)[i] == '0') ++i;
+    while ((*res)[i] == '0') 
+    {
+        if (i == max_len) is_all_zero = true;
+        ++i;
+    }
+    if (is_all_zero) --i;
     for (int j = i; j < max_len + 1; ++j) 
     {
         (*res)[j - i] = (*res)[j];
@@ -115,7 +106,7 @@ status_code sum_of_two(const char* str_1, const char* str_2, const int base, cha
     char* tmp = (char*)realloc(*res, sizeof(char) * (max_len + 2 - i));
     if (tmp == NULL) 
     {
-        multi_free(1, *res);
+        free(*res);
         return allocate_error;
     }
     *res = tmp;
@@ -135,19 +126,18 @@ status_code sum_of_numbers(const int base, const int nums_amount, char** result,
 
     for (int i = 0; i < nums_amount; ++i) 
     {
-        const char* cur_num = va_arg(ptr, char*);
+        const char* cur_num = va_arg(ptr, const char*);
         if (!validate_input(cur_num, base)) 
         {
             va_end(ptr);
-            if (prev_res != NULL) multi_free(1, prev_res);
-            if (*result != NULL) multi_free(1, *result);
+            free(prev_res);
             return invalid_num;
         }
 
         if (sum_of_two(prev_res, cur_num, base, result) == allocate_error) 
         { 
             va_end(ptr);
-            multi_free(1, prev_res);
+            free(prev_res);
             return allocate_error;
         }
 
@@ -155,7 +145,8 @@ status_code sum_of_numbers(const int base, const int nums_amount, char** result,
         if (tmp == NULL) 
         {
             va_end(ptr);
-            multi_free(2, prev_res, *result);
+            free(prev_res);
+            free(*result);
             return allocate_error;
         }
         prev_res = tmp;
@@ -164,14 +155,14 @@ status_code sum_of_numbers(const int base, const int nums_amount, char** result,
     }
 
     va_end(ptr);
-    multi_free(1, prev_res);
+    free(prev_res);
     return success;
 }
 
 int main() 
 {
-    char* res_str;
-    switch (sum_of_numbers(36, 4, &res_str, "zzZ", "ABZC", "H8", "0"))
+    char* res_str = NULL;
+    switch (sum_of_numbers(2, 2, &res_str, "1", "0", "1"))
     {
         case success:
             printf("res: %s\n", res_str);
@@ -187,6 +178,10 @@ int main()
             return 1;
     }
 
-    multi_free(1, res_str);
+    if (res_str != NULL) 
+    {
+        free(res_str);   
+        res_str = NULL;
+    } 
     return 0;
 }

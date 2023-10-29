@@ -79,7 +79,7 @@ int main()
     double* new_coefs;
     int new_coefs_len;
 
-    switch (redecomposion(1e-8, 1, 5, &new_coefs_len, &new_coefs, (double)-112, (double)7, (double)-2, (double)0, (double)3, (double)1))
+    switch (redecomposion(1e-8, -3, 1, &new_coefs_len, &new_coefs, (double)8, (double)5, (double)-2, (double)0, (double)3, (double)1))
     {
     case success:
         print_coefs(new_coefs_len, new_coefs);

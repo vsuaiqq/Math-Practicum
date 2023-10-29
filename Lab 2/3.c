@@ -2,17 +2,18 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
-#define START_CAPACITY 33
+#include <stdarg.h>
 
 typedef enum status_code 
 {
     success,
+    file_error,
     allocate_error,
 } status_code;
 
 typedef struct Entrance 
 {
+    char* file_name;
     int line_num, first_entrance;
 } Entrance;
 
@@ -20,22 +21,21 @@ void print_entrances(const int entrances_size, Entrance entrances[])
 {
     for (int i = 0; i < entrances_size; ++i) 
     {
-        printf("   %d %d\n", entrances[i].line_num, entrances[i].first_entrance);
+        printf("%s %d %d\n", entrances[i].file_name, entrances[i].line_num, entrances[i].first_entrance);
     }
 }
 
-status_code find_substr_in_file(FILE* file, const char* substr, Entrance** entrances, int* entrances_size) {
-    *entrances = (Entrance*)malloc(sizeof(Entrance) * START_CAPACITY);
-    if (*entrances == NULL) return allocate_error;
-    *entrances_size = 0;
-
+status_code find_substr_in_file(FILE* file, const char* substr, const char* file_name, 
+                                Entrance** entrances, int* entrances_size, int* entrances_capacity) 
+{
     const int substr_len = strlen(substr);
-    int cur_capacity = START_CAPACITY;
+    
     int substr_idx = 0;
-    int first_in_line_num = -1;
-    int first_in_char_pos = -1;
     int line_num = 1; 
     int char_pos = 0;
+
+    int first_in_line_num = -1;
+    int first_in_char_pos = -1;
 
     bool is_found = false;
 
@@ -67,17 +67,18 @@ status_code find_substr_in_file(FILE* file, const char* substr, Entrance** entra
 
             if (substr_idx == substr_len) 
             {  
-                if (*entrances_size >= cur_capacity) 
+                if (*entrances_size >= (*entrances_capacity))
                 {
-                    Entrance* tmp = (Entrance*)realloc(*entrances, sizeof(Entrance) * cur_capacity * 2);
+                    Entrance* tmp = (Entrance*)realloc(*entrances, sizeof(Entrance) * (*entrances_capacity) * 2);
                     if (tmp == NULL) 
                     {
                         free(*entrances);
                         return allocate_error;
                     }
-                    cur_capacity *= 2;
+                    *entrances_capacity *= 2;
                     *entrances = tmp;
-                }
+                } 
+                (*entrances)[*entrances_size].file_name = strdup(file_name);
                 (*entrances)[*entrances_size].line_num = first_in_line_num;
                 (*entrances)[*entrances_size].first_entrance = first_in_char_pos;
                 ++(*entrances_size);
@@ -111,7 +112,7 @@ status_code find_substr_in_file(FILE* file, const char* substr, Entrance** entra
             char_pos = 0;
         }
     }
-
+    /*
     Entrance* tmp = (Entrance*)realloc(*entrances, sizeof(Entrance) * (*entrances_size));
     if (tmp == NULL) 
     {
@@ -119,49 +120,61 @@ status_code find_substr_in_file(FILE* file, const char* substr, Entrance** entra
         return allocate_error;
     }
     *entrances = tmp;
-
+    */
     return success;  
 }
 
-int main(int argc, char* argv[]) 
+status_code find_substr_in_all_files(char* substr, Entrance** entrances, int* entrances_size, int num_of_files, ...) 
 {
-    if (argc < 2) 
+    int entrances_capacity = 32;
+    *entrances = (Entrance*)malloc(sizeof(Entrance) * entrances_capacity);
+    if (*entrances == NULL) return allocate_error;
+    *entrances_size = 0;
+    va_list ptr;
+    va_start(ptr, num_of_files);
+    for (int i = 0; i < num_of_files; ++i) 
     {
-        printf("invalid number of parameters\n");
-        return 1;
-    }
-
-    const char* substr_to_find = argv[1];
-    //const char* substr_to_find = "abc";
-    //const char* substr_to_find = "ab\nc";
-    //const char* substr_to_find = "\n";
-    for (int i = 2; i < argc; ++i) 
-    {
-        FILE* file = fopen(argv[i], "r");
+        const char* file_name = va_arg(ptr, const char*);
+        FILE* file = fopen(file_name, "r");
         if (file == NULL) 
         {
-            printf("file open error\n");
-            return 1;
+            if ((*entrances) != NULL) free(*entrances);
+            va_end(ptr);
+            return file_error;
         }
-
-        Entrance* entrances;
-        int entrances_size;
-
-        switch (find_substr_in_file(file, substr_to_find, &entrances, &entrances_size))
+        if (find_substr_in_file(file, substr, file_name, entrances, entrances_size, &entrances_capacity) == allocate_error) 
         {
-            case success:
-                printf("%s\n", argv[i]);
-                print_entrances(entrances_size, entrances);
-                break;
-            case allocate_error: 
-                printf("allocate error!\n");
-                fclose(file);
-                return 1;
+            va_end(ptr);
+            fclose(file);
+            return allocate_error;
         }
-
-        free(entrances);
         fclose(file);
     }
+    va_end(ptr);
+    return success;
+}
+
+int main() 
+{
+    char* substr_to_find = "abc";
+
+    Entrance* entrances;
+    int entrances_size;
+
+    switch (find_substr_in_all_files(substr_to_find, &entrances, &entrances_size, 3, "a.txt", "b.txt", "c.txt"))
+    {
+        case success:
+            print_entrances(entrances_size, entrances);
+            break;
+        case file_error:
+            printf("file error!\n");
+            return 1;
+        case allocate_error:
+            printf("allocate error!\n");
+            return 1;
+    }
+
+    free(entrances);
 
     return 0;
 }
