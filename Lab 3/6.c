@@ -546,24 +546,6 @@ void print_menu()
     printf("---------------------------------------\n");
 }
 
-void print_storage(Storage* storage) 
-{
-    Vehicle* tmp_vehicle = storage->vehicles->head;
-    while (tmp_vehicle) 
-    {
-        printf("---%s---\n", tmp_vehicle->id);
-        Station* tmp_station = tmp_vehicle->stations->head;
-        while (tmp_station) 
-        {
-            printf("%s %s %s %s %s\n", tmp_station->id, tmp_station->arrive->date, tmp_station->arrive->time, tmp_station->depart->date, tmp_station->depart->time);
-            tmp_station=tmp_station->next_station;
-        }
-        printf("\n");
-        printf("----------\n");
-        tmp_vehicle=tmp_vehicle->next_vehicle;
-    }
-}
-
 int main(int argc, char* argv[]) 
 {
     if (argc < 2) 
@@ -584,7 +566,7 @@ int main(int argc, char* argv[])
         printf("Allocate error detected!\n");
         return 1;
     }
-    print_storage(storage);
+
     int cmd;
     while (true) 
     {
