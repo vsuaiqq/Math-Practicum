@@ -34,11 +34,12 @@ void free_tree(Tnode* tree_root)
     {
         tmp = tmp->children;
         free(tmp->parent);
-        while (tmp != NULL) 
+        while (tmp->next_brother != NULL) 
         {
-            free_tree(tmp);
             tmp = tmp->next_brother;
+            free_tree(tmp->prev_brother);
         }
+        free(tmp);
     }
 }
 
@@ -120,7 +121,7 @@ status_code create_tree_by_str(Tnode** tree_root, const char* expression_str)
                     status = insert_brother(tmp, cur_symbol);
                     if (status == allocate_error) 
                     {
-                        free(*tree_root);
+                        free_tree(*tree_root);
                         return allocate_error;
                     }
                     tmp = tmp->next_brother;
@@ -130,7 +131,7 @@ status_code create_tree_by_str(Tnode** tree_root, const char* expression_str)
                     status = insert_child(tmp, cur_symbol);
                     if (status == allocate_error) 
                     {
-                        free(*tree_root);
+                        free_tree(*tree_root);
                         return allocate_error;
                     }
                     tmp = tmp->children;
@@ -144,7 +145,7 @@ status_code create_tree_by_str(Tnode** tree_root, const char* expression_str)
                     status_code status = insert_brother(tmp, cur_symbol);
                     if (status == allocate_error) 
                     {
-                        free(*tree_root);
+                        free_tree(*tree_root);
                         return allocate_error;
                     }
                     tmp = tmp->next_brother;
@@ -188,16 +189,16 @@ status_code solve(FILE* input_file, FILE* output_file)
                 return allocate_error;
         }
         
-        fprintf(output_file, "input expression: %s\n", expression);
-        fprintf(output_file, "tree:\n");
+        fprintf(output_file, "--------------------------\n");
         print_tree_to_file(tree_root, output_file, 1);
-        fprintf(output_file, "\n");
+        fprintf(output_file, "--------------------------\n");
 
-        free(tree_root);
+        free_tree(tree_root);
         free(expression);
         expression = NULL;
     }
 
+    free(expression);
     return success;
 }
 

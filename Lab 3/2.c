@@ -173,67 +173,35 @@ status_code get_max_vectors_by_norm(Vector*** res, int* max_norm_res_size, int* 
     }
 
     int max_norm_res_capacity = 1, p_norm_res_capacity = 1, matrix_norm_res_capacity = 1;
-    (*res)[0] = (Vector*)malloc(sizeof(Vector) * max_norm_res_capacity);
-    (*res)[1] = (Vector*)malloc(sizeof(Vector) * p_norm_res_capacity);
-    (*res)[2] = (Vector*)malloc(sizeof(Vector) * matrix_norm_res_capacity);
+    (*res)[0] = (Vector*)malloc(sizeof(Vector) * num_of_vectors);
+    (*res)[1] = (Vector*)malloc(sizeof(Vector) * num_of_vectors);
+    (*res)[2] = (Vector*)malloc(sizeof(Vector) * num_of_vectors);
+    if ((*res)[0] == NULL || (*res)[1] == NULL || (*res)[2] == NULL) return allocate_error;
     *max_norm_res_size = 0, *p_norm_res_size = 0, *matrix_norm_res_size = 0;
 
     for (int i = 0; i < num_of_vectors; ++i) 
     {
         if (max_norm_for_all[i] == max_max_norm) 
         {
-            if (*max_norm_res_size >= max_norm_res_capacity) 
-            {
-                max_norm_res_capacity *= 2;
-                Vector* tmp = (Vector*)realloc((*res)[0], max_norm_res_capacity);
-                if (tmp == NULL) 
-                {
-                    free(*res[1]), free(*res[2]), free(*res);
-                    return allocate_error;
-                }
-                (*res)[0] = tmp;
-            }
             (*res)[0][*max_norm_res_size] = vectors[i];
             ++(*max_norm_res_size);
         }
         if (p_norm_for_all[i] == max_p_norm) 
         {
-            if (*p_norm_res_size >= p_norm_res_capacity) 
-            {
-                p_norm_res_capacity *= 2;
-                Vector* tmp = (Vector*)realloc((*res)[1], p_norm_res_capacity);
-                if (tmp == NULL) 
-                {
-                    free(*res[0]), free(*res[2]), free(*res);
-                    return allocate_error;
-                }
-                (*res)[1] = tmp;
-            }
             (*res)[1][*p_norm_res_size] = vectors[i];
             ++(*p_norm_res_size);
         }
         if (matrix_norm_for_all[i] == max_matrix_norm) 
         {
-            if (*matrix_norm_res_size >= matrix_norm_res_capacity) 
-            {
-                matrix_norm_res_capacity *= 2;
-                Vector* tmp = (Vector*)realloc((*res)[2], matrix_norm_res_capacity);
-                if (tmp == NULL) 
-                {
-                    free(*res[0]), free(*res[1]), free(*res);
-                    return allocate_error;
-                }
-                (*res)[2] = tmp;
-            }
             (*res)[2][*matrix_norm_res_size] = vectors[i];
             ++(*matrix_norm_res_size);
         }
     }
+ 
     return success;
 }
 
-void print_results(Vector** res, const int dim, 
-    const int max_norm_res_size, const int p_norm_res_size, const int matrix_norm_res_size) 
+void print_results(Vector** res, const int max_norm_res_size, const int p_norm_res_size, const int matrix_norm_res_size) 
 {
     printf("max norm res:\n\n");
     for (int i = 0; i < max_norm_res_size; ++i) 
@@ -268,18 +236,17 @@ int main()
 
     switch (get_max_vectors_by_norm(&res, &max_norm_res_size, &p_norm_res_size, &matrix_norm_res_size, max_norm, p_norm, matrix_norm, 3, 1, 4, a, b, c, d))
     {
-    case success:
-        break;
-    case invalid_parameter:
-        printf("invalid parameter detected!\n");
-
-        return 1;
-    case allocate_error:
-        printf("allocate error detected!\n");
-        return 1;
+        case success:
+            break;
+        case invalid_parameter:
+            printf("invalid parameter detected!\n");
+            return 1;
+        case allocate_error:
+            printf("allocate error detected!\n");
+            return 1;
     }
 
-    print_results(res, 3, max_norm_res_size, p_norm_res_size, matrix_norm_res_size);
+    print_results(res, max_norm_res_size, p_norm_res_size, matrix_norm_res_size);
 
     delete_vectors(4, a, b, c, d);
     free(res);

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <math.h>
 
+#define STR_SIZE 256
+
 typedef enum status_code 
 {
     success,
@@ -15,8 +17,8 @@ typedef enum status_code
 typedef struct Employee 
 {
     int id;
-    char name[256];
-    char surname[256];
+    char name[STR_SIZE];
+    char surname[STR_SIZE];
     double salary;
 } Employee;
 
@@ -127,12 +129,14 @@ status_code read_data_from_file(const char* file_path, Employee** employees, int
     size_t line_size = 0;
 
     int getline_res;
-    while ((getline_res = getline(&line, &line_size, input_file)) != 1) 
+    while ((getline_res = getline(&line, &line_size, input_file)) != -1) 
     {
         if (getline_res == -1) 
         {
+            free(*employees);
+            fclose(input_file);
             free(line);
-            return success;
+            return allocate_error;
         }
         Employee struct_tmp;
 

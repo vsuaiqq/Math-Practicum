@@ -118,7 +118,7 @@ status_code decimal_to_power_of_two(const int power_of_two, int num, char** resu
         (*result)[i] = (*result)[right_idx];
         (*result)[right_idx] = tmp;
     }
-    
+
     return success;
 }
 
@@ -126,7 +126,7 @@ int main()
 {
     char* result;
 
-    switch (decimal_to_power_of_two(1, 0, &result)) 
+    switch (decimal_to_power_of_two(1, 16, &result)) 
     {
         case success:
             printf("%s\n", result);
