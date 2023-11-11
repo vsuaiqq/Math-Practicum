@@ -5,7 +5,6 @@
 #include <math.h>
 
 #define EPS 1e-9
-#define STR_SIZE 256
 
 typedef enum status_code 
 {
@@ -31,10 +30,10 @@ typedef enum action_type
 
 typedef struct Liver 
 {
-    char surname[STR_SIZE];
-    char name[STR_SIZE];
-    char patronymic[STR_SIZE];
-    char birthday[STR_SIZE];
+    char surname[BUFSIZ];
+    char name[BUFSIZ];
+    char patronymic[BUFSIZ];
+    char birthday[BUFSIZ];
     char gender;
     double avg_income;
 } Liver;
@@ -54,7 +53,7 @@ typedef struct Action
 {
     Node* node;
     action_type type;
-    char old_initial[256];
+    char old_initial[BUFSIZ];
     char old_gender;
     double old_avg_income;
     struct Action* prev_action;
