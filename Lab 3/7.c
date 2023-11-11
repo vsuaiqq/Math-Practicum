@@ -550,8 +550,13 @@ void add_input(char* surname, char* name, char* patronymic, char* birthday, char
     while (getchar() != '\n');
     printf("Enter gender of liver: ");
     scanf("%c", gender);
+    while (getchar() != '\n');
     printf("Enter average income of liver: ");
-    scanf("%lf", avg_income);
+    if (scanf("%lf", avg_income) != 1) 
+    {
+        while (getchar() != '\n');
+        *avg_income = -1;
+    }
 }
 
 int main(int argc, char* argv[]) 
@@ -619,7 +624,7 @@ int main(int argc, char* argv[])
                 }
                 if (status == not_found) 
                 {
-                    printf("Liver doesn\'t found\n");
+                    printf("Liver doesn\'t found!\n");
                 }
             } else printf("Invalid data!\n");
         }
@@ -638,7 +643,7 @@ int main(int argc, char* argv[])
                     print_edit_menu();
                     printf("Enter number of field you want to edit: ");
                     if (scanf("%d", &cmd) != 1) cmd = 7;
-
+                    
                     if (cmd == 1) 
                     {
                         char new_surname[BUFSIZ];
@@ -707,7 +712,7 @@ int main(int argc, char* argv[])
                             undo_delete(storage, res);
                             ++modifications_count;
                         }
-                        else printf("Invalid data\n");
+                        else printf("Invalid data!\n");
                     }
                     else if (cmd == 5) 
                     {
@@ -725,24 +730,31 @@ int main(int argc, char* argv[])
                             res->data->gender = new_gender;
                             ++modifications_count;
                         }
-                        else printf("Invalid data\n");
+                        else printf("Invalid data!\n");
                     }
                     else if (cmd == 6) 
                     {
                         double new_avg_income;
                         printf("Enter new average income: ");
-                        scanf("%lf", &new_avg_income);
-                        if (validate_avg_income(new_avg_income)) 
+                        if (scanf("%lf", &new_avg_income) != 1) 
                         {
-                            if (push(actions, res, change_avg_income, NULL, 0, res->data->avg_income) == allocate_error) 
-                            { 
-                                printf("Allocate error detected!\n"); 
-                                return 1; 
-                            }
-                            res->data->avg_income = new_avg_income;
-                            ++modifications_count;
+                            printf("Invalid data!\n");
+                            while (getchar() != '\n');
                         }
-                        else printf("Invalid data\n");
+                        else 
+                        {
+                            if (validate_avg_income(new_avg_income)) 
+                            {
+                                if (push(actions, res, change_avg_income, NULL, 0, res->data->avg_income) == allocate_error) 
+                                { 
+                                    printf("Allocate error detected!\n"); 
+                                    return 1; 
+                                }
+                                res->data->avg_income = new_avg_income;
+                                ++modifications_count;
+                            }
+                            else printf("Invalid data!\n");
+                        }
                     }
                     else printf("Invalid command!\n");
                 }
@@ -778,7 +790,7 @@ int main(int argc, char* argv[])
                     return 1; 
                 }
                 ++modifications_count;
-            } else printf("Invalid data\n");
+            } else printf("Invalid data!\n");
         }
         else if (cmd == 4) 
         {
@@ -802,7 +814,7 @@ int main(int argc, char* argv[])
                 }
                 if (status == not_found) 
                 {
-                    printf("Liver doesn\'t found\n");
+                    printf("Liver doesn\'t found!\n");
                 }
             } else printf("Invalid data!\n");
             
