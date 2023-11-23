@@ -480,6 +480,7 @@ status_code write_list_to_file(List* list, const char* output_file_path)
 void undo(Stack* actions, List* storage, const int modifications_count) 
 {
     Action* tmp = actions->last_action;
+    Action* tmp_next = actions->last_action;
     for (int i = 0; i < (int)ceil(modifications_count / 2.0); ++i)
     {
         switch (tmp->type)
@@ -502,6 +503,8 @@ void undo(Stack* actions, List* storage, const int modifications_count)
             case delete:
                 undo_delete(storage, tmp->node);
         }
+        tmp_next = tmp;
+        free(tmp_next);
         tmp = tmp->prev_action;
         actions->last_action = tmp;
     }

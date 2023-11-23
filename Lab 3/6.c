@@ -560,13 +560,19 @@ int main(int argc, char* argv[])
         printf("Allocate error detected!\n");
         return 1;
     }
-    if (read_data_from_files(argc, argv, storage) == allocate_error) 
+
+    const status_code status = read_data_from_files(argc, argv, storage);
+    if (status == allocate_error) 
     {
-        delete_storage(storage);
         printf("Allocate error detected!\n");
         return 1;
     }
-
+    if (status == file_error) 
+    {
+        printf("File error detected!\n");
+        return 1;
+    }
+    
     int cmd;
     while (true) 
     {

@@ -126,7 +126,7 @@ int main()
 {
     char* result;
 
-    switch (decimal_to_power_of_two(1, 16, &result)) 
+    switch (decimal_to_power_of_two(1, 577, &result)) 
     {
         case success:
             printf("%s\n", result);
