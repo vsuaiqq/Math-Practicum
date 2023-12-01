@@ -21,7 +21,8 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
 
         str_to_lower(&line);
-        
+        const int command_len = strlen(line);
+
         int num1, num2, num3;
         char name1, name2;
         char file_path[BUFSIZ];
@@ -44,13 +45,14 @@ status_code solve(FILE* instructions, Arrays** arrays)
                 fclose(instructions);
                 return FILE_ERROR;
             }
-            if (load(*arrays, name1, input_file) == ALLOCATE_ERROR) 
+            const status_code st = load(*arrays, name1, input_file);
+            if (st != SUCCESS) 
             {
                 free(line);
                 free_arrays(*arrays);
                 fclose(instructions);
                 fclose(input_file);
-                return ALLOCATE_ERROR;
+                return st;
             }
             fclose(input_file);
         }
@@ -84,7 +86,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "rand %c, %d, %d, %d;", &name1, &num1, &num2, &num3) == 4) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (13 + int_len(num1) + int_len(num2) + int_len(num3) != command_len)) return INVALID_DATA;
             const status_code st = rand_fill(*arrays, name1, num1, num2, num3);
             if (st != SUCCESS) 
             {
@@ -96,7 +98,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         } 
         else if (sscanf(line, "concat %c, %c;", &name1, &name2) == 2) 
         {
-            if (!validate_name(name1) || !validate_name(name2)) return INVALID_DATA;
+            if (!validate_name(name1) || !validate_name(name2) || (command_len != 12)) return INVALID_DATA;
             const status_code st = concat(*arrays, name1, name2);
             if (st != SUCCESS) 
             {
@@ -108,7 +110,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         } 
         else if (sscanf(line, "free(%c);", &name1) == 1) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (command_len != 8)) return INVALID_DATA;
             if (remove_array(*arrays, name1) == NOT_FOUND) 
             {
                 free(line);
@@ -119,7 +121,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "remove %c, %d, %d;", &name1, &num1, &num2) == 3) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (13 + int_len(num1) + int_len(num2) != command_len)) return INVALID_DATA;
             const status_code st = remove_elements(*arrays, name1, num1, num2);
             if (st != SUCCESS) 
             {
@@ -131,7 +133,8 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "copy %c, %d, %d, %c;", &name1, &num1, &num2, &name2) == 4) 
         {
-            if (!validate_name(name1) || !validate_name(name2)) return INVALID_DATA;
+            if (!validate_name(name1) || !validate_name(name2) 
+                || (14 + int_len(num1) + int_len(num2) != command_len)) return INVALID_DATA;
             const status_code st = copy(*arrays, name2, name1, num1, num2);
             if (st != SUCCESS) 
             {
@@ -143,7 +146,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "sort %c;", &name1) == 1) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (command_len != 8)) return INVALID_DATA;
             const sort_type type = get_sort_type(line);
             if (type == INVALID) 
             {
@@ -163,7 +166,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "shuffle %c;", &name1) == 1) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (command_len != 10)) return INVALID_DATA;
             const status_code st = sort(*arrays, name1, RANDOM);
             if (st != SUCCESS) 
             {
@@ -175,7 +178,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "stats %c;", &name1) == 1) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (command_len != 8)) return INVALID_DATA;
             const status_code st = stats(*arrays, name1);
             if (st != SUCCESS) 
             {
@@ -187,7 +190,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "print %c, %d, %d;", &name1, &num1, &num2) == 3) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (12 + int_len(num1) + int_len(num2) != command_len)) return INVALID_DATA;
             const status_code st = print_arr_slice(*arrays, name1, num1, num2);
             if (st != SUCCESS) 
             {
@@ -199,7 +202,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "print %c, %d;", &name1, &num1) == 2) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (10 + int_len(num1) != command_len)) return INVALID_DATA;
             const status_code st = print_arr_slice(*arrays, name1, num1, num1);
             if (st != SUCCESS) 
             {
@@ -211,7 +214,7 @@ status_code solve(FILE* instructions, Arrays** arrays)
         }
         else if (sscanf(line, "print %c, all;", &name1) == 1) 
         {
-            if (!validate_name(name1)) return INVALID_DATA;
+            if (!validate_name(name1) || (command_len != 13)) return INVALID_DATA;
             const status_code st = print_arr(*arrays, name1);
             if (st != SUCCESS) 
             {
@@ -258,6 +261,7 @@ int main(int argc, char* argv[])
         case SUCCESS:
             free_arrays(arrays);
             fclose(instructions);
+            break;
         default:
             print_error(st);
     }

@@ -32,10 +32,11 @@ int cmp_asc(const void* a, const void* b);
 int cmp_dsc(const void* a, const void* b);
 int cmp_rand(const void* a, const void* b);
 int get_rand(int min, int max);
+int int_len(int num);
 void print_error(const status_code error_code);
 void str_to_lower(char** str);
 bool validate_name(const char name);
-bool validate_command(const char* command);
+bool validate_command(char* command);
 sort_type get_sort_type(const char* command);
 
 #endif

@@ -60,7 +60,7 @@ status_code load(Arrays* arrays, const char name, FILE* input_file)
     }
     if (arrays->size) 
     {
-        Array** tmp = (Array**)realloc(arrays->data, arrays->size);
+        Array** tmp = (Array**)realloc(arrays->data, sizeof(Array*) * arrays->size);
         if (!tmp) 
         {
             free_array(array_to_load);
@@ -96,7 +96,7 @@ status_code load(Arrays* arrays, const char name, FILE* input_file)
             array_to_load->data[array_to_load->size - 1] = num;
         }
     }
-    return SUCCESS;
+    return feof(input_file) ? SUCCESS : INVALID_DATA;
 }
 
 status_code save(Arrays* arrays, const char name, FILE* stream) 
@@ -130,6 +130,7 @@ status_code rand_fill(Arrays* arrays, const char name, const int size, const int
     {
         free_array(array_to_fill);
         array_to_fill = NULL;
+        --arrays->size;
     }
     if (create_array(&array_to_fill, name) == ALLOCATE_ERROR) 
     {
@@ -137,7 +138,7 @@ status_code rand_fill(Arrays* arrays, const char name, const int size, const int
     }
     if (arrays->size) 
     {
-        Array** tmp = (Array**)realloc(arrays->data, arrays->size);
+        Array** tmp = (Array**)realloc(arrays->data, arrays->size * sizeof(Array*));
         if (!tmp) 
         {
             free_array(array_to_fill);
@@ -154,8 +155,7 @@ status_code rand_fill(Arrays* arrays, const char name, const int size, const int
             return ALLOCATE_ERROR;
         }
     }
-    ++arrays->size;
-    arrays->data[arrays->size - 1] = array_to_fill;
+    arrays->data[arrays->size++] = array_to_fill;
     array_to_fill->data = (int*)malloc(sizeof(int) * size);
     array_to_fill->size = size;
     if (!array_to_fill->data) return ALLOCATE_ERROR;
@@ -186,7 +186,7 @@ status_code concat(Arrays* arrays, const char dest_name, const char src_name)
     if (!dest_array || !src_array) return NOT_FOUND;
     const int old_dist_size = dest_array->size;
     dest_array->size += src_array->size;
-    int* tmp = (int*)realloc(dest_array->data, dest_array->size);
+    int* tmp = (int*)realloc(dest_array->data, dest_array->size * sizeof(int));
     if (!tmp) return ALLOCATE_ERROR;
     dest_array->data = tmp;
     for (int i = old_dist_size, j = 0; i < dest_array->size; ++i, ++j) 
@@ -242,6 +242,17 @@ status_code remove_array(Arrays* arrays, const char name)
         if (arrays->data[i]->name == name) 
         {
             array_to_remove = arrays->data[i];
+            for (int j = i + 1; j < arrays->size; ++j) 
+            {
+                arrays->data[j - 1] = arrays->data[j];
+            }
+            Array** tmp = (Array**)realloc(arrays->data, sizeof(Array*) * --arrays->size);
+            if (!tmp) 
+            {
+                free_array(array_to_remove);
+                return ALLOCATE_ERROR;
+            }
+            arrays->data = tmp;
         }
     }
     if (!array_to_remove) return NOT_FOUND;
@@ -267,7 +278,7 @@ status_code remove_elements(Arrays* arrays, const char name, const int start, co
         array_to_remove_elements->data[i - count] = array_to_remove_elements->data[i];
     }
     array_to_remove_elements->size -= count;
-    int* tmp = (int*)realloc(array_to_remove_elements->data, array_to_remove_elements->size);
+    int* tmp = (int*)realloc(array_to_remove_elements->data, array_to_remove_elements->size * sizeof(int));
     if (!tmp) return ALLOCATE_ERROR;
     array_to_remove_elements->data = tmp;
     return SUCCESS;
@@ -288,6 +299,7 @@ status_code sort(Arrays* arrays, const char name, const sort_type type)
                     qsort(arrays->data[i]->data, arrays->data[i]->size, sizeof(int), cmp_dsc);
                     break;
                 case RANDOM:
+                    srand(time(NULL));
                     qsort(arrays->data[i]->data, arrays->data[i]->size, sizeof(int), cmp_rand);
                     break;
                 default:

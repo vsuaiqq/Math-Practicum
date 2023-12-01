@@ -20,6 +20,17 @@ int get_rand(int min, int max)
     return min + rand() % (max - min + 1);
 }
 
+int int_len(int num) 
+{
+    int res = (num < 0) ? 1 : 0;
+    do
+    {
+        num /= 10;
+        ++res;
+    } while (num);
+    return res;
+}
+
 void print_error(const status_code error_code) 
 {
     switch (error_code)
@@ -53,11 +64,11 @@ bool validate_name(const char name)
     return (name >= 'a' && name <= 'z') || (name >= 'A' && name <= 'Z');
 }
  
-bool validate_command(const char* command) 
+bool validate_command(char* command) 
 {
-    const int command_len = strlen(command);
-    if ((command[command_len - 1] == '\n') && (command[command_len - 2] != ';')) return false;
-    if ((command[command_len - 1] != '\n') && (command[command_len - 1] != ';')) return false;
+    int command_len = strlen(command);
+    if (command[command_len - 1] == '\n') command[command_len-- - 1] = '\0';
+    if (command[command_len - 1] != ';') return false;
     return true;
 }
 
