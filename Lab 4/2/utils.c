@@ -42,7 +42,7 @@ void print_error(const status_code error_code)
             printf("Allocate error detected!\n");
             break;
         case INVALID_DATA:
-            printf("Invalid input data!\n");
+            printf("Invalid input data! Syntax error, invalid value or trying to use an empty array\n");
             break;
         case NOT_FOUND:
             printf("Array doesn't exist!\n");

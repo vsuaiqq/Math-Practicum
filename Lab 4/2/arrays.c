@@ -3,7 +3,10 @@
 void free_array(Array* array) 
 {
     if (!array) return;
-    if (array->data) free(array->data);
+    if (array->data) 
+    {
+        free(array->data);
+    }
     free(array);
 }
 
@@ -16,8 +19,10 @@ void free_arrays(Arrays* arrays)
         {
             free_array(arrays->data[i]);
         }
+        free(arrays->data);
     }
     free(arrays);
+    arrays = NULL;
 }
 
 status_code create_array(Array** array, const char name) 
@@ -322,13 +327,22 @@ status_code stats(Arrays* arrays, const char name)
         }
     }
     if (!array_to_get_stats) return NOT_FOUND;
+    if (!array_to_get_stats->size) return INVALID_DATA;
 
-    int max = array_to_get_stats->data[0], min = array_to_get_stats->data[0];
+    int max = array_to_get_stats->data[0], max_idx = 0, min = array_to_get_stats->data[0], min_idx = 0;
     double avg = 0;
     for (int i = 0; i < array_to_get_stats->size; ++i) 
     {
-        max = fmax(max, array_to_get_stats->data[i]);
-        min = fmin(min, array_to_get_stats->data[i]);
+        if (array_to_get_stats->data[i] > max) 
+        {
+            max = array_to_get_stats->data[i];
+            max_idx = i;
+        }
+        if (array_to_get_stats->data[i] < min) 
+        {
+            min = array_to_get_stats->data[i];
+            min_idx = i;
+        }
         avg += array_to_get_stats->data[i];
     }
     avg /= array_to_get_stats->size;
@@ -361,8 +375,8 @@ status_code stats(Arrays* arrays, const char name)
 
     printf("Array %c stats:\n", name);
     printf("Size: %d\n", array_to_get_stats->size);
-    printf("Max element: %d\n", max);
-    printf("Min element: %d\n", min);
+    printf("Max element value: %d, Max element index: %d\n", max, max_idx);
+    printf("Min element: %d, Min element index: %d\n", min, min_idx);
     printf("Most common element: %d\n", most_common);
     printf("Average elements value: %lf\n", avg);
     printf("Max deviation from average: %lf\n", max_deviation);
@@ -401,7 +415,7 @@ status_code print_arr(Arrays* arrays, const char name)
             {
                 printf("%d ", arrays->data[i]->data[j]);
             }
-            printf("\n");
+            if (arrays->data[i]->size) printf("\n");
             return SUCCESS;
         }
     }

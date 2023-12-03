@@ -3,11 +3,7 @@
 
 status_code solve(FILE* instructions, Arrays** arrays) 
 {
-    if (create_arrays(arrays) == ALLOCATE_ERROR) 
-    {
-        fclose(instructions);
-        return ALLOCATE_ERROR;
-    }
+    if (create_arrays(arrays) == ALLOCATE_ERROR) return ALLOCATE_ERROR;
     char* line = NULL;
     int getline_res;
     while ((getline_res = getline(&line, &(size_t){0}, instructions)) != -1) 
@@ -15,8 +11,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
         if (!validate_command(line)) 
         {
             free(line);
-            free_arrays(*arrays);
-            fclose(instructions);
             return INVALID_DATA;
         }
 
@@ -32,8 +26,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (!validate_name(name1)) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return INVALID_DATA;
             }
             file_path[strlen(file_path) - 1] = '\0';
@@ -41,16 +33,12 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (!input_file) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return FILE_ERROR;
             }
             const status_code st = load(*arrays, name1, input_file);
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 fclose(input_file);
                 return st;
             }
@@ -61,8 +49,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (!validate_name(name1)) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return INVALID_DATA;
             }
             file_path[strlen(file_path) - 1] = '\0';
@@ -70,15 +56,11 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (!output_file) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return FILE_ERROR;
             }
             if (save(*arrays, name1, output_file) == NOT_FOUND) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 fclose(output_file);
                 return NOT_FOUND; 
             }
@@ -91,8 +73,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         } 
@@ -103,8 +83,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         } 
@@ -114,8 +92,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (remove_array(*arrays, name1) == NOT_FOUND) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return NOT_FOUND;
             }
         }
@@ -126,8 +102,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -139,8 +113,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -151,16 +123,12 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (type == INVALID) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return INVALID_DATA;
             }
             const status_code st = sort(*arrays, name1, type);
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -171,8 +139,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -183,8 +149,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -195,8 +159,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -207,8 +169,6 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
@@ -219,16 +179,12 @@ status_code solve(FILE* instructions, Arrays** arrays)
             if (st != SUCCESS) 
             {
                 free(line);
-                free_arrays(*arrays);
-                fclose(instructions);
                 return st;
             }
         }
         else 
         {
             free(line);
-            free_arrays(*arrays);
-            fclose(instructions);
             return INVALID_DATA;
         }
 
@@ -255,16 +211,13 @@ int main(int argc, char* argv[])
     }
 
     Arrays* arrays = NULL;
+
     const status_code st = solve(instructions, &arrays);
-    switch (st)
-    {
-        case SUCCESS:
-            free_arrays(arrays);
-            fclose(instructions);
-            break;
-        default:
-            print_error(st);
-    }
+
+    print_error(st);
+
+    free_arrays(arrays);
+    fclose(instructions);
 
     return st;
 }
