@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <ctype.h>
 
 typedef enum status_code 
 {
@@ -168,7 +169,6 @@ status_code read_data(const char* input_file_path, char* seps[], const int num_o
                 free_list(*list);
                 return allocate_error;
             }
-            printf("%d %s\n", strlen(word), word);
             free(word);
             word = NULL;
             word_len = 0, word_cap = 32;
@@ -212,7 +212,6 @@ status_code read_data(const char* input_file_path, char* seps[], const int num_o
             free_list(*list);
             return allocate_error;
         }
-        printf("%d %s\n", strlen(word), word);
         free(word);
         word = NULL;
     }
@@ -230,7 +229,7 @@ int tree_depth(Tree* root)
 void print_stats(Tree* root) 
 {
     if (!root) return;
-    printf("%d %s\n", root->count, root->word);
+    printf("%d {%s}\n", root->count, root->word);
     print_stats(root->left);
     print_stats(root->right);
 }
@@ -247,7 +246,7 @@ void print_max_len_word(List* list)
 {
     if (!list) return;
     if (!list->head) return;
-    printf("Max length word is %s\n", list->head->word);
+    printf("Max length word is {%s}\n", list->head->word);
 }
 
 void print_min_len_word(List* list) 
@@ -256,7 +255,7 @@ void print_min_len_word(List* list)
     if (!list->head) return;
     Node* tmp = list->head;
     while (tmp->next) tmp = tmp->next;
-    printf("Min length word is %s\n", tmp->word);
+    printf("Min length word is {%s}\n", tmp->word);
 }
 
 void print_max_count(List* list, const int n) 
@@ -267,7 +266,7 @@ void print_max_count(List* list, const int n)
     for (int i = 0; i < n; ++i) 
     {
         if (!tmp) return;
-        printf("%d %s\n", tmp->len, tmp->word);
+        printf("%d {%s}\n", tmp->len, tmp->word);
         tmp = tmp->next;
     }
 }
@@ -276,28 +275,91 @@ void print_tree(Tree* root, FILE* stream, int spaces)
 {
     if (!root) return;
     for (int i = 0; i < spaces; ++i) fputc('\t', stream);
-    fprintf(stream, "%d %s\n", root->count, root->word);
+    fprintf(stream, "%d {%s}\n", root->count, root->word);
     print_tree(root->left, stream, spaces + 1);
     print_tree(root->right, stream, spaces + 1);
 }
 
-status_code get_tree_from_file(FILE* stream, Tree** root) 
+status_code get_tree_from_file(FILE* file, Tree** root) 
 {
-    char* str = NULL;
-    while (getline(&str, &(size_t){0}, stream) != -1) 
+    bool got_count = false, is_word_starts = false;
+
+    int count = 0, i = 0;
+
+    char count_str[BUFSIZ];
+
+    char* word = (char*)malloc(sizeof(char) * BUFSIZ);
+    if (!word) return allocate_error;
+
+    char c = fgetc(file);
+    while (c != EOF) 
     {
-        int count = 0;
-        char word[BUFSIZ];
-        sscanf(str, "%d%s", &count, word);
-        free(str);
-        str = NULL;
-        for (int i = 0; i < count; ++i) 
+        if (!got_count && isdigit(c)) 
         {
-            if (add_word(word, root, false, NULL) == allocate_error) return allocate_error;
+            count_str[i] = c;
+            ++i;
         }
-    } 
-    free(str);
-    str = NULL;
+        if (i && !got_count && !isdigit(c)) 
+        {
+            i = 0;
+            count = atoi(count_str);
+            count_str[i] = '\0';
+            got_count = true;
+            c = fgetc(file);
+        }
+        if (got_count) 
+        {
+            if (c == '{') 
+            {
+                is_word_starts = true;
+                c = fgetc(file);
+                continue;
+            }
+            if (is_word_starts) 
+            {
+                if (c == '}') 
+                {
+                    c = fgetc(file);
+                    if (c != '\n') 
+                    {
+                        fseek(file, -2, SEEK_CUR);
+                        c = fgetc(file);
+                        word[i] = c;
+                        i++;
+                        c = fgetc(file);
+                        continue;
+                    }
+                    fseek(file, -1, SEEK_CUR);
+                    c = fgetc(file);
+                    word[i] = '\0';
+
+                    for (int i = 0; i < count; ++i) 
+                    {
+                        if (add_word(word, root, false, NULL) == allocate_error) 
+                        {
+                            free(word);
+                            return allocate_error;
+                        }
+                    }
+
+                    free(word);
+                    word = NULL;
+                    word = (char*)malloc(sizeof(char) * BUFSIZ);
+                    if (!word) return allocate_error;
+
+                    i = 0;
+                    got_count = false, is_word_starts = false;
+                } 
+                else 
+                {
+                    word[i] = c;
+                    ++i;
+                }
+            }
+        }
+        c = fgetc(file);
+    }
+    if (word) free(word);
     return success;
 }
 
@@ -308,10 +370,10 @@ void print_menu()
     printf("| [stats] - how many times each word from the file occurs in the file      |\n");
     printf("| [word_count] <word> - number of occurrences of the word in the text      |\n");
     printf("| [max_count] <N> - first N most occurence words in the text               |\n");
-    printf("| [max_len] - word with max length                                         |\n");
-    printf("| [min_len] - word with min length                                         |\n");
-    printf("| [depth] - depth of bst                                                   |\n");
-    printf("| [print] <file_path> - print bst to <file_path> and get it back to stdout |\n");
+    printf("| [max_len] - get word with max length                                     |\n");
+    printf("| [min_len] - get word with min length                                     |\n");
+    printf("| [depth] - get depth of BST                                               |\n");
+    printf("| [print] <file_path> - print BST to <file_path> and get it back to stdout |\n");
     printf("| [exit] - finish the programm                                             |\n");
     printf("*--------------------------------------------------------------------------*\n");
 }
@@ -391,6 +453,7 @@ status_code interaction(Tree* root, List* list)
         else if (!strcmp("exit", cmd)) break;
         else printf("Invalid command!\n");
     }
+    return success;
 }
 
 int main(int argc, char* argv[]) 
