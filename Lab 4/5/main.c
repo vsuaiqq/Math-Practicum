@@ -56,6 +56,7 @@ status_code solve(const int num_of_files, char* file_pathes[])
                 }
                 print_error(errors_file, st, infix, line);
                 free(infix);
+                infix = NULL;
                 line++;
                 continue;
             }

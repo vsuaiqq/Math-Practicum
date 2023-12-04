@@ -19,7 +19,7 @@ status_code to_postfix(char** postfix, const char* infix)
 
     for (int i = 0; i < infix_len; ++i) 
     {
-        if (infix[i] == ' ' || infix[i] == '\t' || infix[i] == '\n') continue;
+        if (isspace(infix[i])) continue;
         if (!is_operator(infix[i]) && !is_bracket(infix[i])) 
         {
             (*postfix)[postfix_len] = infix[i];
@@ -33,7 +33,7 @@ status_code to_postfix(char** postfix, const char* infix)
         }
         else if (infix[i] == ')') 
         {
-            bool operator_flag = 0;
+            bool operator_flag = false;
             --depth;
             while (true) 
             {
@@ -45,7 +45,7 @@ status_code to_postfix(char** postfix, const char* infix)
                 }
                 const int val = pop(st);
                 if (val == '(') break;
-                operator_flag = 1;
+                operator_flag = true;
                 (*postfix)[postfix_len] = val;
                 ++postfix_len;
             }
@@ -73,14 +73,16 @@ status_code to_postfix(char** postfix, const char* infix)
             if (c == '-') 
             {
                 bool is_binary = false;
-                for (int j = i - 1; j >= 0; --j) 
+                int j = i - 1;
+                while (j >= 0) 
                 {
                     if (is_bracket(infix[j]) && infix[j] != ')') break;
                     if (isdigit(infix[j])) 
                     {
-                        is_binary = 1;
+                        is_binary = true;
                         break;
                     }
+                    --j;
                 }
                 if (!is_binary) c = 'd';
             }
@@ -138,7 +140,7 @@ status_code calculate_postfix(const char* postfix, int* result)
     }
     for (int i = 0; i < postfix_len; ++i) 
     {
-        if (postfix[i] == ' ' || postfix[i] == '\t' || postfix[i] == '\n') continue;
+        if (isspace(postfix[i])) continue;
         if (!isdigit(postfix[i]) && !is_operator(postfix[i]) && !is_bracket(postfix[i])) 
         {
             free_stack(st);
@@ -147,7 +149,7 @@ status_code calculate_postfix(const char* postfix, int* result)
         }
         if (isdigit(postfix[i])) 
         {
-            while (i < postfix_len && (isdigit(postfix[i]))) 
+            while ((isdigit(postfix[i])) && i < postfix_len) 
             {
                 number[number_len] = postfix[i];
                 ++number_len;
