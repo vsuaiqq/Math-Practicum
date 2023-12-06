@@ -35,6 +35,7 @@ status_code insert_table(hash_table* table, const char* def_name, const char* va
 status_code rebuild_table(hash_table* table);
 unsigned long long int hash_function(const char* def_name);
 char* find_in_table(hash_table* table, const char* def_name, unsigned long long int (*hash_function)(const char* def_name));
+bool check_duplicate_in_list(List* list, Item* item, bool* res);
 bool check_chains(hash_table* table);
 
 #endif

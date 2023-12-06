@@ -108,6 +108,13 @@ status_code insert_table(hash_table* table, const char* def_name, const char* va
         return ALLOCATE_ERROR;
     }
     const int index = item->hash_value % (table->hash_size);
+    bool is_duplicate;
+    if (check_duplicate_in_list(table->data[index], item, &is_duplicate) == ALLOCATE_ERROR) 
+    {
+        free_item(item);
+        return ALLOCATE_ERROR;
+    }
+    if (is_duplicate) return SUCCESS;
     if (insert_list(&table->data[index], item) == ALLOCATE_ERROR) 
     {
         free_item(item);
@@ -188,6 +195,31 @@ char* find_in_table(hash_table* table, const char* def_name, unsigned long long 
         tmp = tmp->next;
     }
     return NULL;
+}
+
+bool check_duplicate_in_list(List* list, Item* item, bool* res) 
+{
+    if (!list) 
+    {
+        *res = false;
+        return SUCCESS;
+    }
+    Item* tmp = list->head;
+    while (tmp) 
+    {
+        if (!strcmp(tmp->def_name, item->def_name)) 
+        {
+            free(tmp->value);
+            tmp->value = (char*)malloc(sizeof(char) * (strlen(item->value) + 1));
+            if (!tmp->value) return ALLOCATE_ERROR;
+            strcpy(tmp->value, item->value);
+            *res = true;
+            return SUCCESS;
+        }
+        tmp = tmp->next;
+    }
+    *res = false;
+    return SUCCESS;
 }
 
 bool check_chains(hash_table* table) 
