@@ -45,6 +45,7 @@ status_code solve(const char* file_path, hash_table** table, unsigned long long 
         free(line);
         break;
     }
+    
     fseek(file, offset, SEEK_CUR);
 
     char c = fgetc(file);
@@ -136,9 +137,10 @@ int main(int argc, char* argv[])
     if (st != SUCCESS) 
     {
         print_err(st);
+        return st;
     }
 
     free_table(table);
 
-    return st;
+    return SUCCESS;
 }

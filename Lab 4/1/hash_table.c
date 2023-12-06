@@ -192,7 +192,7 @@ char* find_in_table(hash_table* table, const char* def_name, unsigned long long 
 
 bool check_chains(hash_table* table) 
 {
-    int max_chain_len = 0, min_chain_len = 0;
+    int max_chain_len = -1, min_chain_len = -1;
     for (int i = 0; i < table->hash_size; ++i) 
     {
         if (table->data[i]) 
@@ -201,11 +201,11 @@ bool check_chains(hash_table* table)
             {
                 max_chain_len = table->data[i]->length;
             }
-            if (table->data[i]->length < min_chain_len) 
+            if (table->data[i]->length < min_chain_len || min_chain_len == -1) 
             {
                 min_chain_len = table->data[i]->length;
             }
         }
     }
-    return (max_chain_len / min_chain_len < 2);
+    return (min_chain_len) ? (max_chain_len / min_chain_len < 2) : true;
 }
