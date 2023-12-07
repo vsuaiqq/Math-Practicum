@@ -31,6 +31,7 @@ void free_table(hash_table* table)
         {
             free_list(table->data[i]);
         }
+        table->data = NULL;
     }
     table->hash_size = 0, table = NULL;
 }
@@ -39,7 +40,7 @@ status_code create_table(hash_table** table, const int hash_size)
 {
     (*table) = (hash_table*)malloc(sizeof(hash_table));
     if (!*table) return ALLOCATE_ERROR;
-    (*table)->data = (List**)malloc(sizeof(Item) * hash_size);
+    (*table)->data = (List**)malloc(sizeof(List*) * hash_size);
     if (!(*table)->data) 
     {
         free_table(*table);
@@ -75,6 +76,7 @@ status_code create_item(Item** item, const char* def_name, const char* value, co
     {
         (*item)->hash_value = hash_function(def_name);
     }
+    (*item)->next = NULL;
     return SUCCESS;
 }
 
@@ -100,52 +102,51 @@ status_code insert_list(List** list, Item* item)
     return SUCCESS;
 }
 
-status_code insert_table(hash_table* table, const char* def_name, const char* value, const bool has_hash_val, const unsigned long long int hash_value, unsigned long long int (*hash_function)(const char* def_name)) 
+status_code insert_table(hash_table** table, const char* def_name, const char* value, const bool has_hash_val, const unsigned long long int hash_value, unsigned long long int (*hash_function)(const char* def_name)) 
 {
     Item* item = NULL;
     if (create_item(&item, def_name, value, has_hash_val, hash_value, hash_function) == ALLOCATE_ERROR) 
     {
         return ALLOCATE_ERROR;
     }
-    const int index = item->hash_value % (table->hash_size);
+    const int index = item->hash_value % ((*table)->hash_size);
     bool is_duplicate;
-    if (check_duplicate_in_list(table->data[index], item, &is_duplicate) == ALLOCATE_ERROR) 
+    if (check_duplicate_in_list((*table)->data[index], item, &is_duplicate) == ALLOCATE_ERROR) 
     {
         free_item(item);
         return ALLOCATE_ERROR;
     }
     if (is_duplicate) return SUCCESS;
-    if (insert_list(&table->data[index], item) == ALLOCATE_ERROR) 
+    if (insert_list(&((*table)->data[index]), item) == ALLOCATE_ERROR) 
     {
         free_item(item);
         return ALLOCATE_ERROR;
     }
-    if (!check_chains(table)) 
+    if (!check_chains(*table)) 
     {
-        return rebuild_table(table);
+        if (rebuild_table(table) == ALLOCATE_ERROR) 
+        {
+            return ALLOCATE_ERROR;
+        }
     }
     return SUCCESS;
 }
 
-status_code rebuild_table(hash_table* table) 
+status_code rebuild_table(hash_table** table) 
 {
-    hash_table* rebuilded_table = (hash_table*)malloc(sizeof(hash_table));
-    if (!rebuilded_table) return ALLOCATE_ERROR;
-    rebuilded_table->hash_size = get_next_prime(table->hash_size);
-    rebuilded_table->data = (List**)malloc(sizeof(List) * rebuilded_table->hash_size);
-    if (!rebuilded_table->data) 
+    hash_table* rebuilded_table = NULL;
+    if (create_table(&rebuilded_table, get_next_prime((*table)->hash_size)) == ALLOCATE_ERROR)
     {
-        free_table(rebuilded_table);
         return ALLOCATE_ERROR;
     }
-    for (int i = 0; i < table->hash_size; ++i) 
+    for (int i = 0; i < (*table)->hash_size; ++i) 
     {
-        if (table->data[i]) 
+        if ((*table)->data[i]) 
         {
-            Item* tmp = table->data[i]->head;
+            Item* tmp = (*table)->data[i]->head;
             while (tmp) 
             {
-                if (insert_table(rebuilded_table, tmp->def_name, tmp->value, true, tmp->hash_value, NULL) == ALLOCATE_ERROR) 
+                if (insert_table(&rebuilded_table, tmp->def_name, tmp->value, true, tmp->hash_value, NULL) == ALLOCATE_ERROR) 
                 {
                     free_table(rebuilded_table);
                     return ALLOCATE_ERROR;
@@ -154,8 +155,8 @@ status_code rebuild_table(hash_table* table)
             }
         }
     }
-    free_table(table);
-    table = rebuilded_table;
+    free_table(*table);
+    *table = rebuilded_table;
     return SUCCESS;
 }
 
@@ -239,5 +240,5 @@ bool check_chains(hash_table* table)
             }
         }
     }
-    return (min_chain_len) ? (max_chain_len / min_chain_len < 2) : true;
+    return min_chain_len ? ((max_chain_len / min_chain_len) < 2) : true;
 }

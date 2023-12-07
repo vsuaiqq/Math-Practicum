@@ -2,7 +2,7 @@
 
 bool is_prime(const int num) 
 {
-    if (num == 0 || num == 1) return false;
+    if (!num || num == 1) return false;
     if (num == 2) return true;
     if (!(num & 1)) return false;
     for (int d = 3; d * d <= num; d += 2) 
@@ -14,8 +14,12 @@ bool is_prime(const int num)
 
 int get_next_prime(int num) 
 {
+    if (!num || num == 1) return 2;
     if (!(num & 1)) return ++num;
-    while (!is_prime(num)) num += 2;
+    do  
+    {
+        num += 2;
+    } while (!is_prime(num));
     return num;
 }
 

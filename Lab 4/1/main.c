@@ -30,7 +30,7 @@ status_code solve(const char* file_path, hash_table** table, unsigned long long 
         char value[BUFSIZ];
         if (sscanf(line, "#define %s %s", def_name, value) == 2) 
         {
-            if (insert_table(*table, def_name, value, false, 0, hash_function) == ALLOCATE_ERROR) 
+            if (insert_table(table, def_name, value, false, 0, hash_function) == ALLOCATE_ERROR) 
             {
                 free(line);
                 fclose(file);
