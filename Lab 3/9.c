@@ -124,6 +124,15 @@ status_code add_word(const char* word, Tree** root, bool add_to_list, List** lis
     }
 }
 
+bool is_separator(char* seps[], const int num_of_seps, const char c) 
+{
+    for (int i = 2; i < num_of_seps; ++i) 
+    {
+        if (c == seps[i][0]) return true;
+    }
+    return false;
+}
+
 status_code read_data(const char* input_file_path, char* seps[], const int num_of_seps, Tree** root, List** list) 
 {
     for (int i = 2; i < num_of_seps; ++i) 
@@ -146,16 +155,10 @@ status_code read_data(const char* input_file_path, char* seps[], const int num_o
     char c;
     while ((c = fgetc(input_file)) != EOF) 
     {
-        for (int i = 2; i < num_of_seps; ++i) 
-        { 
-            if (c == seps[i][0]) 
-            {
-                is_sep = true;
-                while (c == seps[i][0] && c != EOF) 
-                {
-                    c = fgetc(input_file);
-                }
-            }
+        if (is_separator(seps, num_of_seps, c)) 
+        {
+            is_sep = true;
+            continue;
         }
 
         if (word_len && is_sep) 
@@ -182,7 +185,7 @@ status_code read_data(const char* input_file_path, char* seps[], const int num_o
             }
             is_sep = false;
         }
-
+        
         word[word_len] = c;
         ++word_len;
         if (word_len >= word_cap) 
@@ -199,6 +202,7 @@ status_code read_data(const char* input_file_path, char* seps[], const int num_o
             }
             word = tmp;
         }
+        is_sep = false;
     }
 
     if (word_len) 
@@ -238,8 +242,8 @@ int word_count(Tree* root, const char* word)
 {
     if (!root) return -1;
     if (!strcmp(root->word, word)) return root->count;
-    return word_count(root->left, word);
-    return word_count(root->right, word);
+    const int left_res = word_count(root->left, word);
+    return (left_res == -1) ? word_count(root->right, word) : left_res;
 }
 
 void print_max_len_word(List* list) 
