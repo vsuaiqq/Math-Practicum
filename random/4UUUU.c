@@ -411,4 +411,7 @@ struct FibonacciQueue {
     void* calloc( size_t num, size_t size );
     void free (void* ptr);
     void qsort(void *buf, size_t num, size_t size, int (*compare) (const void *, const void *));
+    size_t fwrite( const void *buffer, size_t size, size_t count, FILE *stream );
+    size_t fread( const void *buffer, size_t size, size_t count, FILE *stream );
+
 */
