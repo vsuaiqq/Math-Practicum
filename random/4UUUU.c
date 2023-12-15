@@ -414,4 +414,20 @@ struct FibonacciQueue {
     size_t fwrite( const void *buffer, size_t size, size_t count, FILE *stream );
     size_t fread( const void *buffer, size_t size, size_t count, FILE *stream );
 
+    Массив указателей на функции
+    int add(int a, int b) {
+        return a + b;
+    }
+
+    int sub(int a, int b) {
+        return a - b;
+    }
+
+    int (*func_ptr[2])(int, int) = {&add, &sub};
+
+    int result1 = (*func_ptr[0])(5, 10);
+    int result2 = (*func_ptr[1])(5, 10);
+
+    int atexit( void ( * funcptr ) (void) );
+    
 */
